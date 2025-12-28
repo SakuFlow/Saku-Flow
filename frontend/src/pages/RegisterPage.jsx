@@ -1,9 +1,10 @@
 import React from 'react'
+import SignInForm from '../components/Sign.jsx'
 
 const RegisterPage = () => {
   return (
     <div>
-      this will be the register page but i didn't start yet
+      <SignInForm></SignInForm>
     </div>
   )
 }

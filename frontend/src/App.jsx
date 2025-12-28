@@ -5,6 +5,8 @@ import ShopPage from './pages/ShopPage.jsx'
 import StatsPage from './pages/StatsPage.jsx'
 import toast from 'react-hot-toast';
 import ThemeController from './components/ThemeController.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
 
 
 const App = () => {
@@ -14,8 +16,10 @@ const App = () => {
     <div data-theme={theme}>
       <Routes>
         <Route path="/" element={<TimerPage theme={theme} setTheme={setTheme} />} />
+        <Route path='/signup' element={<RegisterPage />} />
+        <Route path='/login' element={<LoginPage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/stats" element={<StatsPage theme={theme} setTheme={setTheme} />} />
       </Routes>
     </div>
     

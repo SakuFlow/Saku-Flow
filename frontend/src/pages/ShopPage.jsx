@@ -1,9 +1,12 @@
 import React from 'react'
+import Navbar from '../components/Navbar.jsx';
+import Card from '../components/Card.jsx';
 
 const ShopPage = () => {
   return (
     <div>
-      here will be the shop later
+      <Navbar></Navbar>
+      <Card></Card>
     </div>
   )
 }

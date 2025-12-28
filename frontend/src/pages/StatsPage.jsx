@@ -1,9 +1,15 @@
 import React from 'react'
+import Stat from '../components/Stat.jsx';
+import Navbar from '../components/Navbar.jsx';
+import Achievements from '../components/Achievements.jsx';
 
-const StatsPage = () => {
+
+const StatsPage = ({ theme,  setTheme }) => {
   return (
-    <div>
-      here will be the stats later
+    <div className='items-center'>
+      <Navbar setTheme={setTheme} />
+      <Stat></Stat>
+      <Achievements></Achievements>
     </div>
   )
 }
