@@ -13,7 +13,7 @@ const Navbar = ({theme,  setTheme }) => {
         <ThemeController theme={theme} setTheme={setTheme} />
       </div>
 
-      <h1 className="text-2xl font-bold">Saku 咲く</h1>
+      <h1 className="text-2xl font-bold">SAKU-FLOW</h1>
 
       <ul className="menu menu-horizontal rounded-box bg-base-100 mt-2 inline-flex">
         <li><a href="/">Timer</a></li>
