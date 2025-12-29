@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router'
 import TimerPage from './pages/TimerPage.jsx'
 import ShopPage from './pages/ShopPage.jsx'
@@ -11,14 +11,16 @@ import LoginPage from './pages/LoginPage.jsx'
 
 const App = () => {
 
-  const [theme, setTheme] = useState("coffee");
+  const [theme, setTheme] = useState("");
+
+
   return (
     <div data-theme={theme}>
       <Routes>
         <Route path="/" element={<TimerPage theme={theme} setTheme={setTheme} />} />
         <Route path='/signup' element={<RegisterPage />} />
         <Route path='/login' element={<LoginPage />} />
-        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/shop" element={<ShopPage />}  theme={theme} setTheme={setTheme} />
         <Route path="/stats" element={<StatsPage theme={theme} setTheme={setTheme} />} />
       </Routes>
     </div>

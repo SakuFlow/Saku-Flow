@@ -2,19 +2,24 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 
 
-const TodoComponent = () => {
+const TodoComponent = ({ user }) => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchTodos();
-  }, []);
+useEffect(() => {
+  if (!user) {
+    setTodos([]);
+    return;
+  }
+
+  fetchTodos();
+}, [user]);
 
   const fetchTodos = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/todo", {
+      const res = await fetch("http://localhost:5001/api/todos", {
         credentials: "include"
       });
 
@@ -34,7 +39,7 @@ const TodoComponent = () => {
     if(!newTodo.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:5001/api/todo", {
+      const res = await fetch("http://localhost:5001/api/todos", {
         method: "POST",
         headers: { "Content-Type" : "application/json" },
         credentials: "include",
@@ -42,7 +47,7 @@ const TodoComponent = () => {
       });
       const data = await res.json();
 
-      if(!res.ok) throw new Error(data.message || "Failed to create todo");
+      if(!res.ok) throw new Error(data.message || "You have to login!");
       setTodos((prev) => [...prev, data]);
       setNewTodo("");
     } catch (error) {
@@ -52,7 +57,7 @@ const TodoComponent = () => {
 
   const toggleTodo = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/todo/${id}`,{
+      const res = await fetch(`http://localhost:5001/api/todos/${id}`,{
         method: "PATCH",
         credentials: "include"
       });
@@ -70,7 +75,7 @@ const TodoComponent = () => {
 
   const deleteTodo = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/todo/${id}`, {
+      const res = await fetch(`http://localhost:5001/api/todos/${id}`, {
         method: "DELETE",
         credentials: "include"
       });

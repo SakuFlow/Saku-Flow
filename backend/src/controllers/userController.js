@@ -22,6 +22,42 @@ export async function getUsers(req, res) {
     }
 }
 
+export async function getCurrentUser(req, res) {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if(!user){
+            return res.status(404).json({ message: "user not found" });
+        }
+
+        res.status(200).json({ _id: user._id, username: user.username, email: user.email });
+    } catch (error) {
+        console.error("Error in getUsers method");
+        res.status(500).json({ message: "internal server error" });
+    }
+}
+
+export async function logoutUser(req, res) {
+    try {
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("Error in logoutUser:", error);
+        res.status(500).json({ message: "internal server error" });
+    }
+}
+
 export async function registerUser(req, res) {
     try {
         const { username, email, password } = req.body;

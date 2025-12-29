@@ -2,7 +2,7 @@ import React from 'react';
 
 const TimerComponent = () => {
   return (
-    <div className="flex flex-col items-center gap-8 bg-base-200 text-base-content font-mono p-6 pt-20 min-h-screen">
+    <div className="flex flex-col items-center gap-8 text-base-content font-mono p-6 pt-20 min-h-0">
 
       {/* MAIN CARD */}
       <div className="flex flex-col md:flex-row gap-7 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
@@ -49,11 +49,6 @@ const TimerComponent = () => {
         </div>
 
       </div>
-
-      {/* TODO BUTTON */}
-      <button id="todoButton" className="btn btn-accent px-12 py-3">
-        ADD TODO
-      </button>
 
     </div>
   );
