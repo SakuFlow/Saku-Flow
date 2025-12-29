@@ -5,7 +5,7 @@ const TimerComponent = () => {
     <div className="flex flex-col items-center gap-8 bg-base-200 text-base-content font-mono p-6 pt-20 min-h-screen">
 
       {/* MAIN CARD */}
-      <div className="flex flex-col md:flex-row gap-7 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
+      <div className="flex flex-col md:flex-row gap-8 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
 
         {/* STATUS BAR */}
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
@@ -19,7 +19,7 @@ const TimerComponent = () => {
 
           <div className="flex justify-between items-center mt-4">
             <p id="sessionMode" className="text-success font-semibold">
-              Aktiv: 50min Timer
+              Aktiv: 25min Timer
             </p>
 
             <input 
@@ -35,8 +35,8 @@ const TimerComponent = () => {
         </div>
 
         {/* TIMER */}
-         <div className="flex-1 p-5 items-center bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
-          <h1 id="timer" className="text-6xl text-primary font-bold">50:00</h1>
+        <div className="flex-1 w-full h-64 bg-base-200 border border-base-content/20 rounded-xl flex flex-col items-center justify-center shadow-none">
+          <h1 id="timer" className="text-6xl text-primary font-bold">25:00</h1>
 
           <div className="flex gap-4 mt-6">
             <button className="btn btn-success" onClick={() => console.log("startTimer()")}>

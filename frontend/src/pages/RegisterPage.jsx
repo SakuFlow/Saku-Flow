@@ -1,10 +1,10 @@
 import React from 'react'
-import SignInForm from '../components/Sign.jsx'
+import SignUpForm from '../components/Sign.jsx'
 
 const RegisterPage = () => {
   return (
     <div>
-      <SignInForm></SignInForm>
+      <SignUpForm></SignUpForm>
     </div>
   )
 }
