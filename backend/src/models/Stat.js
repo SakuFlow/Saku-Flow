@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
 const statSchema = new mongoose.Schema({
-    day: {
+    suns: {
         type: Number, 
         default: 0,
         min: 0
     },
     
-    month: {
+    energy: {
         type: Number,
         default: 0,
         min: 0

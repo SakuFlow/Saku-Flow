@@ -9,7 +9,7 @@ export async function auth(req, res, next) {
     }
 
     try {
-        const { _id } = jwt.verify(token, process.env.ACCESS_SECRET); // ✅ use ACCESS_SECRET
+        const { _id } = jwt.verify(token, process.env.ACCESS_SECRET); 
         req.user = await User.findById(_id).select("_id");
         next();
     } catch (error) {

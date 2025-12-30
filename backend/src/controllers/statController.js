@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Stat from "../models/Stat.js";
+import Upgrades from "../models/Upgrades.js";
+import { BASE_VALUES, UPGRADE_VALUES } from "../constants/gameRules.js";
 
 export async function getStats(req, res) {
     try {
@@ -14,13 +16,13 @@ export async function getStats(req, res) {
 export async function createStat(req, res) {
     try {
         const user_id = req.user._id;
-        const { day, month, overall } = req.body;
+        const { suns, energy, overall } = req.body;
 
-        if (day < 0 || month < 0 || overall < 0) {
+        if (suns < 0 || energy < 0 || overall < 0) {
             return res.status(400).json({ message: "Values must be >= 0" });
         }
 
-        const newStat = new Stat({ day, month, overall, user_id });
+        const newStat = new Stat({ suns, energy, overall, user_id });
         const savedStat = await newStat.save();
 
         res.status(201).json(savedStat);
@@ -32,21 +34,35 @@ export async function createStat(req, res) {
 
 export async function updateStat(req, res) {
     try {
-        const { day, month, overall } = req.body;
+        const userId = req.user._id;
+        const { overall } = req.body;
 
-        if (day < 0 || month < 0 || overall < 0) {
-            return res.status(400).json({ message: "Values must be >= 0" });
+        const userUpgrades = await Upgrades.findOne({ user_id: userId });
+
+        let gainedSuns = BASE_VALUES.suns;
+        let gainedEnergy = BASE_VALUES.energy;
+
+        if(userUpgrades && userUpgrades.upgrades) {
+            for(const [upgrade, level] of userUpgrades.upgrades) {
+                const bonus = UPGRADE_VALUES[upgrade];
+                if(!bonus) continue;
+
+                if (bonus.suns) gainedSuns += bonus.suns * level;
+                if (bonus.energy) gainedEnergy += bonus.energy * level;
+            }
         }
 
         const updatedStat = await Stat.findOneAndUpdate(
-            { _id: req.params.id, user_id: req.user._id },
-            { day, month, overall },
-            { new: true }
+            { user_id: userId },
+            {
+                $inc: {
+                    suns: gainedSuns,
+                    energy: gainedEnergy,
+                    overall: overall
+                }
+            },
+            { new: true, upsert: true }
         );
-
-        if (!updatedStat) {
-            return res.status(404).json({ message: "Stat not found" });
-        }
 
         res.status(200).json(updatedStat);
     } catch (error) {
