@@ -1,12 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Card = () => {
-  const shopItems = [
-    { id: 1, name: "Golden Sun", description: "Increases sun production by 10%", price: 10, available: true },
-    { id: 2, name: "Energy Drink", description: "Boosts energy temporarily", price: 50, available: false },
-    { id: 3, name: "Study Book", description: "Increases study efficiency", price: 100, available: false },
-    { id: 4, name: "Magic Plant", description: "Special item coming soon", price: 200, available: false },
+
+  const initialItems = [
+    { id: 1, name: "Golden Sun", description: "Increases sun production by 10%", price: 10, available: true, multiplier: 1.2 },
+    { id: 2, name: "Energy Drink", description: "Boosts energy temporarily", price: 50, available: false, multiplier: 1.3 },
+    { id: 3, name: "Study Book", description: "Increases study efficiency", price: 100, available: false, multiplier: 1.4 },
+    { id: 4, name: "Magic Plant", description: "Special item coming soon", price: 200, available: false, multiplier: 1.5 },
+    { id: 5, name: "Solar Panel", description: "Special item coming soon", price: 1000, available: true, multiplier: 1.6 },
   ];
+
+  const [shopItems, setShopItems] = useState(initialItems);
+
+  // Handle buying an item
+  const handleBuy = (id) => {
+    setShopItems((prevItems) =>
+      prevItems.map((item) => {
+        if (item.id === id) {
+          const newPrice = Math.ceil(item.price * item.multiplier); 
+          return { ...item, price: newPrice };
+        }
+        return item;
+      })
+    );
+  };
 
   return (
     <div className="p-6 w-full md:w-4/5 mx-auto">
@@ -27,7 +44,11 @@ const Card = () => {
               <p className="text-sm mb-2">{item.available ? item.description : "???"}</p>
               <div className="card-actions justify-between items-center mt-2">
                 <span className="font-semibold">{item.available ? `${item.price} ☀` : "---"}</span>
-                <button className="btn btn-primary btn-sm" disabled={!item.available}>
+                <button
+                  className="btn btn-primary btn-sm"
+                  disabled={!item.available}
+                  onClick={() => handleBuy(item.id)}
+                >
                   Buy
                 </button>
               </div>
