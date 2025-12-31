@@ -1,60 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+const SHOP_ITEMS = [
+  { id: 1, displayName: "Golden Sun", upgradeName: "golden_sun", description: "Increases sun production", basePrice: 10, priceMultiplier: 1.2 },
+  { id: 2, displayName: "Energy Drink", upgradeName: "energy_drink", description: "Boosts energy temporarily", basePrice: 50, priceMultiplier: 1.3 },
+  { id: 3, displayName: "Study Book", upgradeName: "study_book", description: "Increases study efficiency", basePrice: 100, priceMultiplier: 1.4 },
+  { id: 4, displayName: "Magic Plant", upgradeName: "magic_plant", description: "Special item coming soon", basePrice: 200, priceMultiplier: 1.5 },
+  { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "Special item coming soon", basePrice: 1000, priceMultiplier: 1.6 },
+];
 
 const Card = () => {
+  const [upgrades, setUpgrades] = useState({});
+  const [suns, setSuns] = useState(0);
+  const [loadingItem, setLoadingItem] = useState(null); // track which item is being bought
+  const [error, setError] = useState(null);
 
-  const initialItems = [
-    { id: 1, name: "Golden Sun", description: "Increases sun production by 10%", price: 10, available: true, multiplier: 1.2 },
-    { id: 2, name: "Energy Drink", description: "Boosts energy temporarily", price: 50, available: false, multiplier: 1.3 },
-    { id: 3, name: "Study Book", description: "Increases study efficiency", price: 100, available: false, multiplier: 1.4 },
-    { id: 4, name: "Magic Plant", description: "Special item coming soon", price: 200, available: false, multiplier: 1.5 },
-    { id: 5, name: "Solar Panel", description: "Special item coming soon", price: 1000, available: true, multiplier: 1.6 },
-  ];
+  useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/stats", {
+        credentials: "include"
+      });
+      const data = await res.json();
+      setSuns(data.suns);
+      setEnergy(data.energy);
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  };
 
-  const [shopItems, setShopItems] = useState(initialItems);
+  fetchStats();
+}, []);
 
-  // Handle buying an item
-  const handleBuy = (id) => {
-    setShopItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id) {
-          const newPrice = Math.ceil(item.price * item.multiplier); 
-          return { ...item, price: newPrice };
-        }
-        return item;
-      })
-    );
+  // Handle buying an upgrade
+  const buyUpgrade = async (item) => {
+    setError(null);
+    setLoadingItem(item.upgradeName);
+
+    try {
+      const res = await fetch("http://localhost:5001/api/upgrades/buy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ upgradeName: item.upgradeName }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Failed to buy upgrade");
+        return;
+      }
+
+      // Update state with new upgrades and suns
+      setUpgrades(data.upgrades);
+      setSuns(data.suns);
+    } catch (err) {
+      console.error("Error buying upgrade:", err);
+      setError("Something went wrong. Try again later.");
+    } finally {
+      setLoadingItem(null);
+    }
   };
 
   return (
     <div className="p-6 w-full md:w-4/5 mx-auto">
       <h1 className="text-3xl font-bold text-center mb-6 text-primary">Shop</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {shopItems.map((item) => (
-          <div
-            key={item.id}
-            className={`card w-72 bg-base-200 shadow-lg rounded-lg p-4 transition-transform transform hover:scale-105 ${
-              !item.available ? "opacity-50" : ""
-            }`}
-          >
-            <figure className="mb-4 h-32 bg-base-300 flex items-center justify-center rounded-md text-gray-500">
-              {item.available ? item.name[0] : "?"}
-            </figure>
-            <div className="card-body p-0">
-              <h2 className="card-title text-lg font-bold">{item.available ? item.name : "???"}</h2>
-              <p className="text-sm mb-2">{item.available ? item.description : "???"}</p>
-              <div className="card-actions justify-between items-center mt-2">
-                <span className="font-semibold">{item.available ? `${item.price} ☀` : "---"}</span>
-                <button
-                  className="btn btn-primary btn-sm"
-                  disabled={!item.available}
-                  onClick={() => handleBuy(item.id)}
-                >
-                  Buy
-                </button>
-              </div>
+
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+      <p className="text-center mb-4">Suns: <strong>{suns}</strong></p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {SHOP_ITEMS.map((item) => {
+          const level = upgrades[item.upgradeName] || 0;
+          const price = Math.floor(item.basePrice * Math.pow(item.priceMultiplier, level));
+          const canBuy = suns >= price && !loadingItem;
+
+          return (
+            <div key={item.upgradeName} className="card w-72 bg-base-200 shadow-lg p-4">
+              <h2 className="text-lg font-bold">{item.displayName}</h2>
+              <p className="text-sm mb-2">{item.description}</p>
+
+              <p className="text-sm mb-2">
+                Level: <strong>{level}</strong>
+              </p>
+
+              <p className="text-sm mb-4">
+                Price: <strong>{price}</strong> suns
+              </p>
+
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => buyUpgrade(item)}
+                disabled={!canBuy || loadingItem === item.upgradeName}
+              >
+                {loadingItem === item.upgradeName ? "Buying..." : "Buy"}
+              </button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

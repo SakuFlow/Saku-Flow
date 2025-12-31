@@ -5,9 +5,38 @@ import Achievements from '../components/Achievements.jsx';
 
 
 const StatsPage = ({ theme,  setTheme }) => {
+
+    const [user, setUser] = useState(null);
+  
+    useEffect(() =>{
+  
+      const fetchCurrentUser = async () => {
+        try {
+          const res = await fetch("http://localhost:5001/api/users/me", {
+            credentials: "include"
+          });
+  
+  
+          if(!res.ok){
+            setUser(null);
+            return;
+          }
+  
+          const data = await res.json();
+          setUser(data);
+        } catch (error) {
+          console.error("Failed to fetch current user: ", error);
+          setUser(null);
+        }
+      };
+  
+      fetchCurrentUser();
+    }, []);
+  
+
   return (
     <div className='items-center'>
-      <Navbar setTheme={setTheme} />
+      <Navbar theme={theme} setTheme={setTheme} user={user} setUser={setUser} />
       <Stat></Stat>
       <Achievements></Achievements>
     </div>

@@ -3,8 +3,30 @@ export const BASE_VALUES = {
     energy: 5
 };
 
-export const UPGRADE_VALUES = {
-    solar_panel: { suns: 2 },
-    energy_drink: { energy: 3},
-    magic_plant: { suns: 5}
+export const UPGRADE_SHOP = {
+    golden_sun: {
+    basePrice: 10,
+    priceMultiplier: 1.2
+  },
+
+  energy_drink: {
+    basePrice: 50,
+    priceMultiplier: 1.3
+  },
+
+  study_book: {
+    basePrice: 100,
+    priceMultiplier: 1.4
+  },
+
+  magic_plant: {
+    basePrice: 200,
+    priceMultiplier: 1.5
+  },
+
+  solar_panel: {
+    basePrice: 1000,
+    priceMultiplier: 1.6
+  }
+  
 };

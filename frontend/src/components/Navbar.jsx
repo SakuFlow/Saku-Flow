@@ -1,7 +1,11 @@
 import React from "react";
 import ThemeController from "./ThemeController";
+import { useEffect } from "react";
 
 const Navbar = ({ theme, setTheme, user, setUser }) => {
+
+  
+
   const handleLogout = async () => {
     try {
       const res = await fetch("http://localhost:5001/api/users/logout", {

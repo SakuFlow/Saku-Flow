@@ -1,10 +1,11 @@
 import express from "express";
-import { buyUpgrade } from "../controllers/upgradeController.js";
+import { buyUpgrade, getUpgrades } from "../controllers/upgradeController.js";
 import { auth } from "../middleware/auth.js";
 
 
 const router = express.Router();
 
-router.post("/buy-upgrade", auth, buyUpgrade);
+router.post("/buy", auth, buyUpgrade);
+router.get("/", auth, getUpgrades);
 
 export default router;

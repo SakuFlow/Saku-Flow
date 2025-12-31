@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import e from "express";
 import jwt from "jsonwebtoken";
+import Upgrades from "../models/Upgrades.js";
+import Stat from "../models/Stat.js";
 
 
 const createAccessToken = (_id) =>
@@ -82,6 +84,18 @@ export async function registerUser(req, res) {
 
         await newUser.save();
 
+        await Stat.create({
+            user_id: newUser._id,
+            suns: 0,
+            energy: 0,
+            overall: 0
+        });
+
+        await Upgrades.create({
+            user_id: newUser._id,
+            upgrades: {}
+        })
+
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -96,7 +110,7 @@ export async function registerUser(req, res) {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        res.status(201).json({ email });
+        res.status(201).json({ email, username });
     } catch (error) {
         console.error("Error in registerUser method:", error); 
         res.status(500).json({ message: "internal server error" });   
@@ -183,11 +197,15 @@ export async function updateUser(req, res){
 
 export async function deleteUser(req, res){
     try {
-        const deletedUser = await User.findByIdAndDelete(req.user._id);
+        const userId = req.user._id;
 
-        if (!deletedUser) {
-            return res.status(404).json({ message: "404 User not found" });
-        }
+        await Upgrades.deleteOne({ user_id: userId} );
+
+        await Stat.deleteOne({ _id: userId });
+
+        res.clearCookie("accesToken");
+        res.clearCookie("refreshToken");
+    
         res.status(200).json({ message: "User deleted succressfully!!" });
 
     } catch (error) {

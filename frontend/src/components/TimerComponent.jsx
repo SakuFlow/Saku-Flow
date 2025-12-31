@@ -2,9 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 
 const TimerComponent = () => {
 
-  const shortSession = 25 * 60;
-  const longSession = 50 * 60; 
+  const shortSession = 5;
+  const longSession = 10; 
 
+  const [suns, setSuns] = useState(0);
+  const [energy, setEnergy] = useState(0);
   const [timeLeft, setTimeLeft] = useState(longSession);
   const [isLongSession, setIsLongSession] = useState(true);
   const intervalRef = useRef(null);
@@ -24,12 +26,30 @@ const TimerComponent = () => {
     }
   }, [duration]);
 
+  useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/stats", {
+        credentials: "include"
+      });
+      const data = await res.json();
+      setSuns(data.suns);
+      setEnergy(data.energy);
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  };
+
+  fetchStats();
+}, []);
+
   const startTimer = () => {
     if(intervalRef.current !== null) return;
 
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if(prev <= 1){
+          handleSessionComplete();
           clearInterval(intervalRef.current);
           intervalRef.current = null;
           return duration;
@@ -46,6 +66,25 @@ const TimerComponent = () => {
     intervalRef.current = null;
     setTimeLeft(duration);
   };
+
+  const handleSessionComplete = async () => {
+    const res = await fetch("http://localhost:5001/api/stats", { 
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ overall: duration })
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      console.error(data.message);
+      return;
+    }
+
+    setSuns(data.suns);
+    setEnergy(data.energy);
+  }
 
   const displayTime = (seconds) => {
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
@@ -86,7 +125,7 @@ const TimerComponent = () => {
           </div>
 
           <p id="suns" className="text-warning text-right font-bold mt-2">
-            0☀️
+            {suns}☀️ | {energy}⚡
           </p>
         </div>
 
@@ -95,7 +134,7 @@ const TimerComponent = () => {
           <h1 id="timer" className="text-6xl text-primary font-bold">{displayTime(timeLeft)}</h1>
 
           <div className="flex gap-4 mt-6">
-            <button className="btn btn-success" onClick={startTimer}>
+            <button className="btn btn-success" onClick={startTimer} disabled={intervalRef.current !== null}>
               Start
             </button>
             <button className="btn btn-error" onClick={stopTimer}>

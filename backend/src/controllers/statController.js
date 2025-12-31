@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 import Stat from "../models/Stat.js";
 import Upgrades from "../models/Upgrades.js";
-import { BASE_VALUES, UPGRADE_VALUES } from "../constants/gameRules.js";
+import { BASE_VALUES, UPGRADE_SHOP } from "../constants/gameRules.js";
 
 export async function getStats(req, res) {
     try {
-        const stats = await Stat.find({ user_id: req.user._id }).lean();
+        const stats = await Stat.findOne({ user_id: req.user._id }).lean();
+        if (!stats) {
+            return res.status(404).json({ suns: 0, energy: 0 }); 
+        }
         res.status(200).json(stats);
     } catch (error) {
         console.error("Error in getStats method:", error);
@@ -13,24 +16,6 @@ export async function getStats(req, res) {
     }
 }
 
-export async function createStat(req, res) {
-    try {
-        const user_id = req.user._id;
-        const { suns, energy, overall } = req.body;
-
-        if (suns < 0 || energy < 0 || overall < 0) {
-            return res.status(400).json({ message: "Values must be >= 0" });
-        }
-
-        const newStat = new Stat({ suns, energy, overall, user_id });
-        const savedStat = await newStat.save();
-
-        res.status(201).json(savedStat);
-    } catch (error) {
-        console.error("Error in createStat method:", error);
-        res.status(500).json({ message: "internal server error" });
-    }
-}
 
 export async function updateStat(req, res) {
     try {
@@ -44,7 +29,7 @@ export async function updateStat(req, res) {
 
         if(userUpgrades && userUpgrades.upgrades) {
             for(const [upgrade, level] of userUpgrades.upgrades) {
-                const bonus = UPGRADE_VALUES[upgrade];
+                const bonus = UPGRADE_SHOP[upgrade];
                 if(!bonus) continue;
 
                 if (bonus.suns) gainedSuns += bonus.suns * level;
