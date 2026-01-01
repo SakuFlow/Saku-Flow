@@ -33,6 +33,7 @@ const TimerComponent = () => {
         credentials: "include"
       });
       const data = await res.json();
+      if (!res.ok) throw new Error("Failed to fetch stats");
       setSuns(data.suns);
       setEnergy(data.energy);
     } catch (error) {

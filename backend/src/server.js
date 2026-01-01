@@ -3,7 +3,7 @@ import todoRoutes from "./routes/todoRoutes.js";
 import statRoutes from "./routes/statRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import upgradeRoutes from "./routes/upgradeRoutes.js";
-import achievmentRoutes from "./routes/achievmentRoutes.js"
+import achievementRoutes from "./routes/achievementsRoutes.js"
 import { connect } from "mongoose";
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
@@ -30,7 +30,7 @@ app.use("/api/todos", todoRoutes);
 app.use("/api/stats", statRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/upgrades", upgradeRoutes);
-app.use("/api/achievments", achievmentRoutes);
+app.use("/api/achievements", achievementRoutes);
 
 connectDB().then(() =>{
     app.listen(PORT, () => {

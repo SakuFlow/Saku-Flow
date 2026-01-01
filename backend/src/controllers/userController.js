@@ -5,7 +5,7 @@ import e from "express";
 import jwt from "jsonwebtoken";
 import Upgrades from "../models/Upgrades.js";
 import Stat from "../models/Stat.js";
-import Achievements from "../../../frontend/src/components/Achievements.jsx";
+import Achievements from "../models/Achievements.js";
 
 
 const createAccessToken = (_id) =>

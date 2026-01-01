@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Stat from "../models/Stat.js";
 import Upgrades from "../models/Upgrades.js";
 import { BASE_VALUES, UPGRADE_SHOP } from "../constants/gameRules.js";
+import { checkAchievements } from "./achievementsController.js";
 
 export async function getStats(req, res) {
     try {
@@ -54,7 +55,7 @@ export async function updateStat(req, res) {
             },
             { new: true, upsert: true }
         );
-
+        await checkAchievements(userId);
         res.status(200).json(updatedStat);
     } catch (error) {
         console.error("Error in updateStat method:", error);

@@ -16,32 +16,33 @@ export async function getAchievements(req, res) {
 }
 
 
-export async function checkAchievements(req, res) {
-    try {
-        const userId = req.user._id;
 
-        const stats = await Stat.findOne({ user_id: userId });
-        if(!stats) return res.status(404).json({ message: "Stats not found"} );
+/*
+Right now the following function is only for the suns..
+In the future (tomorrow) i need to add energy and overall too :)
+*/
+export async function checkAchievements(userId) {
+    const stats = await Stat.findOne({ user_id: userId });
+    if (!stats) return;
 
-        const { suns, energy, overall } = stats;
+    const { suns, energy, overall } = stats;
 
+    let userAch = await Achievements.findOne({ user_id: userId });
+    if (!userAch) {
+        //throw new Error("achievements don't exist");
+        userAch = await Achievements.create({
+            user_id: userId,
+            achievements: {}
+        });
+    }
 
-        let userAch = await Achievements.findOne({ user_id: userId });
-        if(!userAch) return res.status(404).json({ message: "Achievements not found"} );
-
-
-        for (const [id, achievement] of Object.entries(ACHIEVEMENTS)) {
-            if (achievement.suns && suns >= achievement.suns) {
-                if (!userAch.achievements.get(id)){
-                    userAch.achievements.set(id, true);
-                }
+    for (const [id, achievement] of Object.entries(ACHIEVEMENTS)) {
+        if (achievement.suns !== undefined && suns >= achievement.suns) {
+            if (!userAch.achievements.get(id)) {
+                userAch.achievements.set(id, true);
             }
         }
-
-        await userAch.save();
-
-    } catch (error) {
-        console.error("Error in checkAchievements method");
-        res.status(500).json({ message: "internal server error" });
     }
+
+    await userAch.save();
 }
