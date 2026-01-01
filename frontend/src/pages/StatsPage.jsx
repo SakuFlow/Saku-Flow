@@ -1,7 +1,7 @@
-import React from 'react'
 import Stat from '../components/Stat.jsx';
 import Navbar from '../components/Navbar.jsx';
 import Achievements from '../components/Achievements.jsx';
+import React, { useState, useEffect } from 'react';
 
 
 const StatsPage = ({ theme,  setTheme }) => {
@@ -37,8 +37,8 @@ const StatsPage = ({ theme,  setTheme }) => {
   return (
     <div className='items-center'>
       <Navbar theme={theme} setTheme={setTheme} user={user} setUser={setUser} />
-      <Stat></Stat>
-      <Achievements></Achievements>
+      <Stat />
+      <Achievements />
     </div>
   )
 }

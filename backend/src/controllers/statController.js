@@ -5,11 +5,17 @@ import { BASE_VALUES, UPGRADE_SHOP } from "../constants/gameRules.js";
 
 export async function getStats(req, res) {
     try {
-        const stats = await Stat.findOne({ user_id: req.user._id }).lean();
-        if (!stats) {
-            return res.status(404).json({ suns: 0, energy: 0 }); 
-        }
-        res.status(200).json(stats);
+        const userId = req.user._id;
+
+        const stats = await Stat.findOne({ user_id: userId }).lean();
+        const userUpgrades = await Upgrades.findOne({ user_id: userId }).lean();
+
+        res.status(200).json({
+            suns: stats?.suns || 0,
+            energy: stats?.energy || 0,
+            upgrades: userUpgrades?.upgrades || {}, 
+            overall: stats?.overall || 0
+        });
     } catch (error) {
         console.error("Error in getStats method:", error);
         res.status(500).json({ message: "internal server error" });

@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from "react";
 
 const SHOP_ITEMS = [
-  { id: 1, displayName: "Golden Sun", upgradeName: "golden_sun", description: "Increases sun production", basePrice: 10, priceMultiplier: 1.2 },
-  { id: 2, displayName: "Energy Drink", upgradeName: "energy_drink", description: "Boosts energy temporarily", basePrice: 50, priceMultiplier: 1.3 },
-  { id: 3, displayName: "Study Book", upgradeName: "study_book", description: "Increases study efficiency", basePrice: 100, priceMultiplier: 1.4 },
-  { id: 4, displayName: "Magic Plant", upgradeName: "magic_plant", description: "Special item coming soon", basePrice: 200, priceMultiplier: 1.5 },
-  { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "Special item coming soon", basePrice: 1000, priceMultiplier: 1.6 },
+  { id: 1, displayName: "Golden Sun", upgradeName: "golden_sun", description: "coming soon...", basePrice: 10, priceMultiplier: 1.2 },
+  { id: 2, displayName: "Energy Drink", upgradeName: "energy_drink", description: "Coming soon...", basePrice: 50, priceMultiplier: 1.3 },
+  { id: 3, displayName: "Study Book", upgradeName: "study_book", description: "Comming soon..", basePrice: 100, priceMultiplier: 1.4 },
+  { id: 4, displayName: "Magic Plant", upgradeName: "magic_plant", description: "Coming soon..", basePrice: 200, priceMultiplier: 1.5 },
+  { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "Coming soon...", basePrice: 1000, priceMultiplier: 1.6 },
 ];
 
 const Card = () => {
   const [upgrades, setUpgrades] = useState({});
   const [suns, setSuns] = useState(0);
+  const [energy, setEnergy] = useState(0);
   const [loadingItem, setLoadingItem] = useState(null); // track which item is being bought
   const [error, setError] = useState(null);
 
   useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const res = await fetch("http://localhost:5001/api/stats", {
-        credentials: "include"
-      });
-      const data = await res.json();
-      setSuns(data.suns);
-      setEnergy(data.energy);
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/stats", {
+          credentials: "include"
+        });
+        if(!res.ok) throw new Error("Failed to fetch stats");
 
-  fetchStats();
-}, []);
+        const data = await res.json();
+
+        setSuns(data.suns || 0);
+        setEnergy(data.energy || 0);
+        setUpgrades(data.upgrades || {});
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   // Handle buying an upgrade
   const buyUpgrade = async (item) => {
@@ -67,7 +72,10 @@ const Card = () => {
       <h1 className="text-3xl font-bold text-center mb-6 text-primary">Shop</h1>
 
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      <p className="text-center mb-4">Suns: <strong>{suns}</strong></p>
+      <p className="text-center mb-4">
+        Suns: <strong>{suns}</strong> | Energy: <strong>{energy}</strong>
+      </p>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {SHOP_ITEMS.map((item) => {

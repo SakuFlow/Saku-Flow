@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 const Navbar = ({ theme, setTheme, user, setUser }) => {
 
-  
 
   const handleLogout = async () => {
     try {
