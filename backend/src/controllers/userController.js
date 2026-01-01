@@ -5,6 +5,7 @@ import e from "express";
 import jwt from "jsonwebtoken";
 import Upgrades from "../models/Upgrades.js";
 import Stat from "../models/Stat.js";
+import Achievements from "../../../frontend/src/components/Achievements.jsx";
 
 
 const createAccessToken = (_id) =>
@@ -94,7 +95,12 @@ export async function registerUser(req, res) {
         await Upgrades.create({
             user_id: newUser._id,
             upgrades: {}
-        })
+        });
+
+        await Achievements.create({
+            user_id: newUser._id,
+            achievements: {}
+        });
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
