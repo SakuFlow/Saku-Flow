@@ -46,15 +46,15 @@ export const ACHIEVEMENTS = {
   },
   super_suns: {
     description: "Collect 50 suns",
-    suns: 50
+    suns: 100
   },
   sun_hacker: {
     description: "Collect 100 suns",
-    suns: 100
+    suns: 500
   },
   master_of_suns: {
     description: "Collect 500 suns",
-    suns: 500
+    suns: 1000
   },
   sun_god: {
     description: "Collect 10000 suns",

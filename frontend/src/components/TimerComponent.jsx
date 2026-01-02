@@ -1,91 +1,125 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
+
+async function authFetch(url, options = {}) {
+  options.credentials = "include";
+  let res = await fetch(url, options);
+
+  if(res.status === 401) {
+    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    if(refreshRes.ok) {
+      res = await fetch(url, options);
+    } else{
+      throw new Error("Session expired. Please log in again");
+    }
+  }
+
+  return res.json();
+}
 
 const TimerComponent = () => {
-
   const shortSession = 5;
-  const longSession = 10; 
+  const longSession = 10;
+  const shortBreak = 2;
+  const longBreak = 4;
 
   const [suns, setSuns] = useState(0);
   const [energy, setEnergy] = useState(0);
   const [timeLeft, setTimeLeft] = useState(longSession);
   const [isLongSession, setIsLongSession] = useState(true);
+  const [isBreak, setIsBreak] = useState(false);
+
   const intervalRef = useRef(null);
+
   const duration = isLongSession ? longSession : shortSession;
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current !== null) clearInterval(intervalRef.current);
     };
   }, []);
 
   useEffect(() => {
-    if (intervalRef.current === null) {
-      setTimeLeft(duration);
-    }
+    if (intervalRef.current === null) setTimeLeft(duration);
   }, [duration]);
 
   useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const res = await fetch("http://localhost:5001/api/stats", {
-        credentials: "include"
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      setSuns(data.suns);
-      setEnergy(data.energy);
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+    const fetchStats = async () => {
+      try {
+        const data = await authFetch("http://localhost:5001/api/stats");
+        setSuns(data.suns);
+        setEnergy(data.energy);
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
-  fetchStats();
-}, []);
+  useEffect(() => {
+    if (timeLeft <= 0 && intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      handleSessionComplete();
+    }
+  }, [timeLeft]);
 
   const startTimer = () => {
-    if(intervalRef.current !== null) return;
-
+    if (intervalRef.current !== null) return;
     intervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if(prev <= 1){
-          handleSessionComplete();
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-          return duration;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => prev - 1);
     }, 1000);
   };
 
   const stopTimer = () => {
-    if(intervalRef.current === null) return;
-
+    if (intervalRef.current === null) return;
     clearInterval(intervalRef.current);
     intervalRef.current = null;
     setTimeLeft(duration);
   };
 
   const handleSessionComplete = async () => {
-    const res = await fetch("http://localhost:5001/api/stats", { 
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ overall: duration })
-    });
-
-    const data = await res.json();
-
-    if(!res.ok){
-      console.error(data.message);
-      return;
+    if (!isBreak) {
+      // Update stats only for work sessions
+      try {
+        const data = await authFetch("http://localhost:5001/api/stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ overall: duration }),
+        });
+        setSuns(data.suns);
+        setEnergy(data.energy);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
-    setSuns(data.suns);
-    setEnergy(data.energy);
-  }
+    const newIsBreak = !isBreak;
+    setIsBreak(newIsBreak);
+    setTimeLeft(
+      newIsBreak
+        ? isLongSession
+          ? longBreak
+          : shortBreak
+        : isLongSession
+        ? longSession
+        : shortSession
+    );
+  };
+
+  const getSteps = () => {
+    const currentDuration = isBreak
+      ? isLongSession
+        ? longBreak
+        : shortBreak
+      : isLongSession
+      ? longSession
+      : shortSession;
+    return Math.min(currentDuration, 5); 
+  };
 
   const displayTime = (seconds) => {
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
@@ -93,30 +127,39 @@ const TimerComponent = () => {
     return `${mm}:${ss}`;
   };
 
-
   return (
     <div className="flex flex-col items-center gap-8 text-base-content font-mono p-6 pt-20 min-h-0">
-
-      {/* MAIN CARD */}
       <div className="flex flex-col md:flex-row gap-7 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
 
-        {/* STATUS BAR */}
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
           <ul className="steps steps-horizontal gap-2">
-            <li className="step step-primary">10 min</li>
-            <li className="step step-primary">20 min</li>
-            <li className="step">30 min</li>
-            <li className="step">40 min</li>
-            <li className="step">50 min</li>
+            {[...Array(getSteps())].map((_, index) => {
+              const currentDuration = isBreak
+                ? isLongSession
+                  ? longBreak
+                  : shortBreak
+                : isLongSession
+                ? longSession
+                : shortSession;
+
+              const stepsCount = getSteps();
+              const stepLength = currentDuration / stepsCount;
+              const isActive = index <= stepsCount - Math.ceil(timeLeft / stepLength);
+
+              return (
+                <li key={index} className={`step ${isActive ? "step-primary" : ""}`}>
+                  {Math.round(stepLength * (index + 1)) /*/ 60 */} min
+                </li>
+              );
+            })}
           </ul>
 
           <div className="flex justify-between items-center mt-4">
             <p className="text-success font-semibold">
-              Aktiv: {isLongSession ? "50min" : "25min"} Timer
+              {isBreak ? "Break" : "Work"} Timer
             </p>
 
-            <input 
-              id="toggleSwitch"
+            <input
               type="checkbox"
               className="toggle toggle-primary"
               checked={isLongSession}
@@ -125,17 +168,20 @@ const TimerComponent = () => {
             />
           </div>
 
-          <p id="suns" className="text-warning text-right font-bold mt-2">
+          <p className="text-warning text-right font-bold mt-2">
             {suns}☀️ | {energy}⚡
           </p>
         </div>
 
-        {/* TIMER */}
-         <div className="flex-1 p-5 items-center bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
-          <h1 id="timer" className="text-6xl text-primary font-bold">{displayTime(timeLeft)}</h1>
+        <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col items-center gap-4">
+          <h1 className="text-6xl text-primary font-bold">{displayTime(timeLeft)}</h1>
 
           <div className="flex gap-4 mt-6">
-            <button className="btn btn-success" onClick={startTimer} disabled={intervalRef.current !== null}>
+            <button
+              className="btn btn-success"
+              onClick={startTimer}
+              disabled={intervalRef.current !== null}
+            >
               Start
             </button>
             <button className="btn btn-error" onClick={stopTimer}>
@@ -143,11 +189,9 @@ const TimerComponent = () => {
             </button>
           </div>
         </div>
-
       </div>
-
     </div>
   );
-}
+};
 
 export default TimerComponent;

@@ -205,9 +205,12 @@ export async function deleteUser(req, res){
     try {
         const userId = req.user._id;
 
-        await Upgrades.deleteOne({ user_id: userId} );
-
-        await Stat.deleteOne({ _id: userId });
+        await Promise.all([
+            Upgrades.deleteOne({ user_id: userId }),
+            Stat.deleteOne({ user_id: userId }),
+            Todo.deleteMany({ user_id: userId }),
+            Achievements.deleteOne({ user_id: userId }),
+        ]);
 
         res.clearCookie("accesToken");
         res.clearCookie("refreshToken");

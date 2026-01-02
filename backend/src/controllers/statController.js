@@ -34,10 +34,10 @@ export async function updateStat(req, res) {
         let gainedSuns = BASE_VALUES.suns;
         let gainedEnergy = BASE_VALUES.energy;
 
-        if(userUpgrades && userUpgrades.upgrades) {
-            for(const [upgrade, level] of userUpgrades.upgrades) {
+        if (userUpgrades?.upgrades?.size > 0) {
+            for (const [upgrade, level] of userUpgrades.upgrades) {
                 const bonus = UPGRADE_SHOP[upgrade];
-                if(!bonus) continue;
+                if (!bonus) continue;
 
                 if (bonus.suns) gainedSuns += bonus.suns * level;
                 if (bonus.energy) gainedEnergy += bonus.energy * level;
@@ -50,7 +50,7 @@ export async function updateStat(req, res) {
                 $inc: {
                     suns: gainedSuns,
                     energy: gainedEnergy,
-                    overall: overall
+                    overall: Math.round((overall / 60) * 10) / 10
                 }
             },
             { new: true, upsert: true }

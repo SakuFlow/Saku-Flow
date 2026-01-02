@@ -29,11 +29,7 @@ export async function checkAchievements(userId) {
 
     let userAch = await Achievements.findOne({ user_id: userId });
     if (!userAch) {
-        //throw new Error("achievements don't exist");
-        userAch = await Achievements.create({
-            user_id: userId,
-            achievements: {}
-        });
+        throw new Error("achievements don't exist");
     }
 
     for (const [id, achievement] of Object.entries(ACHIEVEMENTS)) {

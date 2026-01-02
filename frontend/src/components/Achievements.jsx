@@ -29,16 +29,16 @@ const Achievements = () => {
 
   const ACHIEVEMENT_DEFS = [
     { id: "first_sun", title: "First Sun" },
+    { id: "sun_seeker", title: "Sun Seeker" },
+    { id: "sun_chaser", title: "Sun Chaser" },
+    { id: "sun_collector", title: "Sun Collector" },
+    { id: "solar_explorer", title: "Solar Explorer" },
     { id: "super_suns", title: "Super Suns" },
     { id: "sun_hacker", title: "Sun Hacker" },
     { id: "master_of_suns", title: "Master of Suns" },
-    { id: "sun_god", title: "Sun God" },
-    { id: "energy_boost", title: "Energy Boost" },
-    { id: "study_master", title: "Study Master" },
-    { id: "super_focus", title: "Super Focus" },
-    { id: "productivity_pro", title: "Productivity Pro" },
-    { id: "mind_garden_expert", title: "Mind Garden Expert" }
-  ];
+    { id: "solar_legend", title: "Solar Legend" },
+    { id: "sun_god", title: "Sun God" }
+  ]
 
   if (loading) {
     return <p className="text-center">Loading achievements…</p>;
