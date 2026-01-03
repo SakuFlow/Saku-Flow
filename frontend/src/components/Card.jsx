@@ -8,6 +8,28 @@ const SHOP_ITEMS = [
   { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "Coming soon...", basePrice: 1000, priceMultiplier: 1.6 },
 ];
 
+
+async function authFetch(url, options = {}) {
+  options.credentials = "include";
+  let res = await fetch(url, options);
+
+  if(res.status === 401) {
+    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    if(refreshRes.ok) {
+      res = await fetch(url, options);
+    } else{
+      throw new Error("Session expired. Please log in again");
+    }
+  }
+
+  return res.json();
+}
+
+
 const Card = () => {
   const [upgrades, setUpgrades] = useState({});
   const [suns, setSuns] = useState(0);
@@ -18,12 +40,9 @@ const Card = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/stats", {
+        const data = await authFetch("http://localhost:5001/api/stats", {
           credentials: "include"
         });
-        if(!res.ok) throw new Error("Failed to fetch stats");
-
-        const data = await res.json();
 
         setSuns(data.suns || 0);
         setEnergy(data.energy || 0);
@@ -42,19 +61,12 @@ const Card = () => {
     setLoadingItem(item.upgradeName);
 
     try {
-      const res = await fetch("http://localhost:5001/api/upgrades/buy", {
+      const data = await authFetch("http://localhost:5001/api/upgrades/buy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ upgradeName: item.upgradeName }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Failed to buy upgrade");
-        return;
-      }
 
       // Update state with new upgrades and suns
       setUpgrades(data.upgrades);

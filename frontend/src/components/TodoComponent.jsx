@@ -1,6 +1,26 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 
+async function authFetch(url, options = {}) {
+  options.credentials = "include";
+  let res = await fetch(url, options);
+
+  if(res.status === 401) {
+    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    if(refreshRes.ok) {
+      res = await fetch(url, options);
+    } else{
+      throw new Error("Session expired. Please log in again");
+    }
+  }
+
+  return res.json();
+}
+
 
 const TodoComponent = ({ user }) => {
   const [todos, setTodos] = useState([]);
@@ -19,13 +39,9 @@ useEffect(() => {
 
   const fetchTodos = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/todos", {
+      const data = await authFetch("http://localhost:5001/api/todos", {
         credentials: "include"
       });
-
-      const data = await res.json();
-
-      if(!res.ok) throw new Error(data.message || "Failed to fetch todos");
       
       setTodos(data);
     } catch (error) {
@@ -39,15 +55,13 @@ useEffect(() => {
     if(!newTodo.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:5001/api/todos", {
+      const data = await authFetch("http://localhost:5001/api/todos", {
         method: "POST",
         headers: { "Content-Type" : "application/json" },
         credentials: "include",
         body: JSON.stringify({ content: newTodo})
       });
-      const data = await res.json();
 
-      if(!res.ok) throw new Error(data.message || "You have to login!");
       setTodos((prev) => [...prev, data]);
       setNewTodo("");
     } catch (error) {
@@ -57,13 +71,10 @@ useEffect(() => {
 
   const toggleTodo = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/todos/${id}`,{
+      const data = await authFetch(`http://localhost:5001/api/todos/${id}`,{
         method: "PATCH",
         credentials: "include"
       });
-      const data = await res.json();
-
-      if(!res.ok) throw new Error(data.message || "Failed to toggle todo");
 
       setTodos((prev) =>
         prev.map((todo) => (todo._id === id ? data : todo)) 
@@ -75,13 +86,10 @@ useEffect(() => {
 
   const deleteTodo = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/todos/${id}`, {
+      const data = await authFetch(`http://localhost:5001/api/todos/${id}`, {
         method: "DELETE",
         credentials: "include"
       });
-      const data = await res.json();
-
-      if(!res.ok) throw new Error(data.message || "Failed to delete todo");
 
       setTodos((prev) => prev.filter((todo) => todo._id !== id));
     } catch (error) {

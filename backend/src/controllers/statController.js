@@ -50,7 +50,7 @@ export async function updateStat(req, res) {
                 $inc: {
                     suns: gainedSuns,
                     energy: gainedEnergy,
-                    overall: Math.round((overall / 60) * 10) / 10
+                    overall: Math.round((overall / 3600) * 10) / 10
                 }
             },
             { new: true, upsert: true }

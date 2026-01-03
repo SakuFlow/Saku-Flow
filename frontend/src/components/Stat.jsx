@@ -1,5 +1,24 @@
 import React, { useState, useEffect } from "react";
 
+async function authFetch(url, options = {}) {
+  options.credentials = "include";
+  let res = await fetch(url, options);
+
+  if(res.status === 401) {
+    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+      method: "POST",
+      credentials: "include"
+    });
+
+    if(refreshRes.ok) {
+      res = await fetch(url, options);
+    } else{
+      throw new Error("Session expired. Please log in again");
+    }
+  }
+
+  return res.json();
+}
 
 const Stat = () => {
 
@@ -10,16 +29,14 @@ const Stat = () => {
   useEffect(() => {
       const fetchStats = async () => {
         try {
-          const res = await fetch("http://localhost:5001/api/stats", {
+          const data = await authFetch("http://localhost:5001/api/stats", {
             credentials: "include"
           });
-          if(!res.ok) throw new Error("Failed to fetch stats");
-  
-          const data = await res.json();
   
           setSuns(data.suns || 0);
           setEnergy(data.energy || 0);
-          setOverall(data.overall || 0);
+          const overallHours = Math.round((data.overall || 0) * 10) / 10;
+          setOverall(overallHours);
         } catch (error) {
           console.error("Failed to fetch stats:", error);
         }

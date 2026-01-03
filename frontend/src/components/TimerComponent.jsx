@@ -20,6 +20,21 @@ async function authFetch(url, options = {}) {
   return res.json();
 }
 
+const TIMER_KEY = "pomodoro_timer";
+
+const saveTimer = (data) => {
+  localStorage.setItem(TIMER_KEY, JSON.stringify(data));
+};
+
+const loadTimer = () => {
+  const raw = localStorage.getItem(TIMER_KEY);
+  return raw ? JSON.parse(raw) : null;
+};
+
+const clearTimer = () => {
+  localStorage.removeItem(TIMER_KEY);
+}
+
 const TimerComponent = () => {
   const shortSession = 5;
   const longSession = 10;
@@ -36,15 +51,14 @@ const TimerComponent = () => {
 
   const duration = isLongSession ? longSession : shortSession;
 
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current !== null) clearInterval(intervalRef.current);
-    };
-  }, []);
 
-  useEffect(() => {
-    if (intervalRef.current === null) setTimeLeft(duration);
-  }, [duration]);
+  const tick = () => {
+    const stored = loadTimer();
+    if(!stored) return;
+
+    const remaining = Math.ceil((stored.endTime - Date.now()) / 1000);
+    setTimeLeft(Math.max(0, remaining));
+  }
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -59,29 +73,64 @@ const TimerComponent = () => {
     fetchStats();
   }, []);
 
+useEffect(() => {
+  if (timeLeft <= 0 && intervalRef.current !== null) {
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    handleSessionComplete();
+  }
+}, [timeLeft]);
+
   useEffect(() => {
-    if (timeLeft <= 0 && intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      handleSessionComplete();
+    const stored = loadTimer();
+    if (!stored) return;
+
+    setIsBreak(stored.isBreak);
+    setIsLongSession(stored.isLongSession);
+
+    const remaining = Math.ceil((stored.endTime - Date.now()) / 1000);
+
+    if(remaining > 0) {
+      setTimeLeft(remaining);
+      intervalRef.current = setInterval(tick, 1000);
+    } else {
+      clearTimer();
     }
-  }, [timeLeft]);
+
+    return () => {
+      if(intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+
+
 
   const startTimer = () => {
     if (intervalRef.current !== null) return;
-    intervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
+
+    const stored = loadTimer();
+    if(stored) return;
+
+    const endTime = Date.now() + timeLeft * 1000;
+
+    saveTimer({
+      endTime,
+      isBreak,
+      isLongSession
+    });
+
+    intervalRef.current = setInterval(tick, 1000);
   };
 
   const stopTimer = () => {
-    if (intervalRef.current === null) return;
-    clearInterval(intervalRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
+    clearTimer();
     setTimeLeft(duration);
   };
 
   const handleSessionComplete = async () => {
+    clearTimer();
     if (!isBreak) {
       // Update stats only for work sessions
       try {
@@ -163,7 +212,7 @@ const TimerComponent = () => {
               type="checkbox"
               className="toggle toggle-primary"
               checked={isLongSession}
-              disabled={intervalRef.current !== null}
+              disabled={intervalRef.current !== null || isBreak}
               onChange={(e) => setIsLongSession(e.target.checked)}
             />
           </div>
