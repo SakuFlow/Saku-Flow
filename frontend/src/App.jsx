@@ -1,31 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router'
-import TimerPage from './pages/TimerPage.jsx'
-import ShopPage from './pages/ShopPage.jsx'
-import StatsPage from './pages/StatsPage.jsx'
-import toast from 'react-hot-toast';
-import ThemeController from './components/ThemeController.jsx'
-import RegisterPage from './pages/RegisterPage.jsx'
-import LoginPage from './pages/LoginPage.jsx'
+import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router";
+import TimerPage from "./pages/TimerPage.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
+import StatsPage from "./pages/StatsPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
 
+const THEME_KEY = "app_theme";
 
 const App = () => {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem(THEME_KEY) || "coffee";
+  });
 
-  const [theme, setTheme] = useState("");
-
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   return (
-    <div data-theme={theme}>
-      <Routes>
-        <Route path="/" element={<TimerPage theme={theme} setTheme={setTheme} />} />
-        <Route path='/signup' element={<RegisterPage />} />
-        <Route path='/login' element={<LoginPage />} />
-        <Route path="/shop" element={<ShopPage />}  theme={theme} setTheme={setTheme} />
-        <Route path="/stats" element={<StatsPage theme={theme} setTheme={setTheme} />} />
-      </Routes>
-    </div>
-    
-  )
-}
+    <Routes>
+      <Route
+        path="/"
+        element={<TimerPage theme={theme} setTheme={setTheme} />}
+      />
+      <Route path="/signup" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/shop"
+        element={<ShopPage theme={theme} setTheme={setTheme} />}
+      />
+      <Route
+        path="/stats"
+        element={<StatsPage theme={theme} setTheme={setTheme} />}
+      />
+    </Routes>
+  );
+};
 
-export default App
+export default App;

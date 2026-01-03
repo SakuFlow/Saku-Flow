@@ -35,8 +35,10 @@ const Stat = () => {
   
           setSuns(data.suns || 0);
           setEnergy(data.energy || 0);
-          const overallHours = Math.round((data.overall || 0) * 10) / 10;
-          setOverall(overallHours);
+
+          const hours = Math.round((data.overall / 3600) * 100) / 100
+
+          setOverall(hours);
         } catch (error) {
           console.error("Failed to fetch stats:", error);
         }

@@ -1,9 +1,9 @@
 import React from 'react'
 
-const ThemeController = ({ setTheme }) => {
+const ThemeController = ({ theme , setTheme }) => {
   const handleChange = (e) => {
     const selected = e.target.value;
-    setTheme(selected);     
+    setTheme(e.target.value);     
   };
 
   return (
