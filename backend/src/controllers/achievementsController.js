@@ -43,6 +43,11 @@ export async function checkAchievements(userId) {
                 userAch.achievements.set(id, true);
             }
         }
+        if (achievement.overall != undefined && overall >= achievement.overall){
+            if(!userAch.achievements.get(id)) {
+                userAch.achievements.set(id, true);
+            }
+        }
     }
 
     await userAch.save();

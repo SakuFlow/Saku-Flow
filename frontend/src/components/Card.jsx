@@ -80,36 +80,38 @@ const Card = () => {
   };
 
   return (
-    <div className="p-6 w-full md:w-4/5 mx-auto">
+    <div className="p-6 flex flex-col items-center">
       <h1 className="text-3xl font-bold text-center mb-6 text-primary">Shop</h1>
 
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      <p className="text-center mb-4">
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>} 
+      <p className="text-center mb-6">
         Suns: <strong>{suns}</strong> | Energy: <strong>{energy}</strong>
       </p>
 
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center">
         {SHOP_ITEMS.map((item) => {
           const level = upgrades[item.upgradeName] || 0;
           const price = Math.floor(item.basePrice * Math.pow(item.priceMultiplier, level));
           const canBuy = suns >= price && !loadingItem;
 
           return (
-            <div key={item.upgradeName} className="card w-72 bg-base-200 shadow-lg p-4">
-              <h2 className="text-lg font-bold">{item.displayName}</h2>
-              <p className="text-sm mb-2">{item.description}</p>
-
-              <p className="text-sm mb-2">
-                Level: <strong>{level}</strong>
-              </p>
-
-              <p className="text-sm mb-4">
-                Price: <strong>{price}</strong> suns
-              </p>
+            <div
+              key={item.upgradeName}
+              className="bg-base-200 shadow-lg rounded-xl p-6 flex flex-col justify-between w-[15rem]  mx-auto"
+            >
+              <div>
+                <h2 className="text-xl font-bold mb-2 text-center">{item.displayName}</h2>
+                <p className="text-sm mb-2 text-center">{item.description}</p>
+                <p className="text-sm mb-1 text-center">
+                  Level: <strong>{level}</strong>
+                </p>
+                <p className="text-sm mb-4 text-center">
+                  Price: <strong>{price}</strong> suns
+                </p>
+              </div>
 
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary btn-sm self-center"
                 onClick={() => buyUpgrade(item)}
                 disabled={!canBuy || loadingItem === item.upgradeName}
               >
@@ -120,6 +122,7 @@ const Card = () => {
         })}
       </div>
     </div>
+
   );
 };
 

@@ -30,8 +30,8 @@ const loadTimer = () =>
 const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 
 const TimerComponent = () => {
-  const shortSession = 5;
-  const longSession = 10;
+  const shortSession = 25 * 60;
+  const longSession = 50 * 60;
   const shortBreak = 2;
   const longBreak = 4;
 
@@ -136,7 +136,7 @@ const TimerComponent = () => {
         const data = await authFetch("http://localhost:5001/api/stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ overall: (timer.isLongSession ? longSession : shortSession) * 60 }),
+          body: JSON.stringify({ overall: (timer.isLongSession ? longSession : shortSession) }),
         });
         setSuns(data.suns);
         setEnergy(data.energy);
@@ -224,7 +224,7 @@ const TimerComponent = () => {
       : shortSession;
   };
 
-  const getSteps = () => Math.min(getCurrentDuration(), 5);
+  const getSteps = () => Math.min(getCurrentDuration(), 4);
 
   const displayTime = (seconds) => {
     const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
@@ -254,7 +254,7 @@ const TimerComponent = () => {
                   key={index}
                   className={`step ${isActive ? "step-primary" : ""}`}
                 >
-                  {Math.round(stepLength * (index + 1))} min
+                  {Math.floor((stepLength * (index + 1)) / 60).toFixed(0)} min
                 </li>
               );
             })}

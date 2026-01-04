@@ -89,5 +89,47 @@ export const ACHIEVEMENTS = {
 
   full_circuit: {
     energy: 10000
+  },
+
+  // overall study timer achievements
+
+  warm_up: {
+    overall: 3600 // 1h
+  },
+
+  power_hour: {
+    overall: 7200 // 2h
+  },
+
+  brain_booster: {
+    overall: 18000 // 5h
+  },
+
+  spark_of_focus: {
+    overall: 36000 // 10h
+  },
+
+  mind_of_steel: {
+    overall: 86400 // 24h
+  },
+
+  infinite_focus: {
+    overall: 180000 // 50 h
+  },
+
+  getting_serious: {
+    overall: 604800 // a full week
+  },
+
+  timeless: {
+    overall: 1800000 // 500h
+  },
+
+  total_domination: {
+    overall: 3600000 // 1000h
+  },
+
+  god_tier_study: {
+    ovreall: 7200000 //2000h
   }
 };

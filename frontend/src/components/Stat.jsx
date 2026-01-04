@@ -36,7 +36,7 @@ const Stat = () => {
           setSuns(data.suns || 0);
           setEnergy(data.energy || 0);
 
-          const hours = Math.round((data.overall / 3600) * 100) / 100
+          const hours = Math.round((data.overall / 3600) * 100) / 100;
 
           setOverall(hours);
         } catch (error) {

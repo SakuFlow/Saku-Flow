@@ -79,10 +79,22 @@ const Achievements = () => {
     { id: "master_of_suns", title: "Master of Suns" },
     { id: "solar_legend", title: "Solar Legend" },
     { id: "sun_god", title: "Sun God" },
+
     { id: "battery_saver", title: "Battery Saver" },
     { id: "watts_up", title: "Watt's up" },
     { id: "overcharged", title: "Overcharged" },
-    { id: "full_circuit", title: "Full Circuit" }
+    { id: "full_circuit", title: "Full Circuit" },
+
+    { id: "warm_up", title: "Warm Up" },
+    { id: "power_hour", title: "Power Hour" },
+    { id: "brain_booster", title: "Brain Booster" },
+    { id: "spark_of_focus", title: "Spark Of Focus" },
+    { id: "mind_of_steel", title: "Mind of Steel" },
+    { id: "infinite_focus", title: "Infinite Foucus" },
+    { id: "getting_serious", title: "Getting Serious" },
+    { id: "timeless", title: "Timeless" },
+    { id: "total_domination", title: "Total Domination" },
+    { id: "god_tier_study", title: "God-Tier Study" },
   ];
 
   if (loading) {
