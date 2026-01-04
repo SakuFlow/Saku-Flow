@@ -19,7 +19,7 @@ export async function getAchievements(req, res) {
 
 /*
 Right now the following function is only for the suns..
-In the future (tomorrow) i need to add energy and overall too :)
+In the future i need to add energy and overall too :)
 */
 export async function checkAchievements(userId) {
     const stats = await Stat.findOne({ user_id: userId });
@@ -34,6 +34,11 @@ export async function checkAchievements(userId) {
 
     for (const [id, achievement] of Object.entries(ACHIEVEMENTS)) {
         if (achievement.suns !== undefined && suns >= achievement.suns) {
+            if (!userAch.achievements.get(id)) {
+                userAch.achievements.set(id, true);
+            }
+        }
+        if(achievement.energy !== undefined && energy >= achievement.energy){
             if (!userAch.achievements.get(id)) {
                 userAch.achievements.set(id, true);
             }

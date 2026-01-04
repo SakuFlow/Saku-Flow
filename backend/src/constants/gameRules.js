@@ -40,44 +40,54 @@ export const UPGRADE_SHOP = {
 
 
 export const ACHIEVEMENTS = {
+
+  // sun achievements
   first_sun: {
-    description: "Collect 1 sun",
     suns: 1
   },
   sun_seeker: {
-    description: "Collect 10 suns",
     suns: 10
   },
   sun_chaser: {
-    description: "Collect 50 suns",
     suns: 50
   },
   sun_collector: {
-    description: "Collect 100 suns",
     suns: 100
   },
   solar_explorer: {
-    description: "Collect 250 suns",
     suns: 250
   },
   super_suns: {
-    description: "Collect 500 suns",
     suns: 500
   },
   sun_hacker: {
-    description: "Collect 1,000 suns",
     suns: 1000
   },
   master_of_suns: {
-    description: "Collect 5,000 suns",
     suns: 5000
   },
   solar_legend: {
-    description: "Collect 10,000 suns",
     suns: 10000
   },
   sun_god: {
-    description: "Collect 50,000 suns",
     suns: 50000
+  },
+
+  // energy achievements
+
+  battery_saver: {
+    energy: 50
+  },
+
+  watts_up: {
+    energy: 500
+  },
+
+  overcharged: {
+    energy: 1000
+  },
+
+  full_circuit: {
+    energy: 10000
   }
 };

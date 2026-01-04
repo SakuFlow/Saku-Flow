@@ -79,6 +79,10 @@ const Achievements = () => {
     { id: "master_of_suns", title: "Master of Suns" },
     { id: "solar_legend", title: "Solar Legend" },
     { id: "sun_god", title: "Sun God" },
+    { id: "battery_saver", title: "Battery Saver" },
+    { id: "watts_up", title: "Watt's up" },
+    { id: "overcharged", title: "Overcharged" },
+    { id: "full_circuit", title: "Full Circuit" }
   ];
 
   if (loading) {

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 async function authFetch(url, options = {}) {
   options.credentials = "include";
@@ -21,8 +21,12 @@ async function authFetch(url, options = {}) {
 
 const TIMER_KEY = "pomodoro_timer";
 
-const saveTimer = (data) => localStorage.setItem(TIMER_KEY, JSON.stringify(data));
-const loadTimer = () => JSON.parse(localStorage.getItem(TIMER_KEY) || "null");
+const saveTimer = (data) =>
+  localStorage.setItem(TIMER_KEY, JSON.stringify(data));
+
+const loadTimer = () =>
+  JSON.parse(localStorage.getItem(TIMER_KEY) || "null");
+
 const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 
 const TimerComponent = () => {
@@ -34,32 +38,145 @@ const TimerComponent = () => {
   const [suns, setSuns] = useState(0);
   const [energy, setEnergy] = useState(0);
   const [timeLeft, setTimeLeft] = useState(longSession);
-  const [isLongSession, setIsLongSession] = useState(true);
-  const [isBreak, setIsBreak] = useState(false);
-  const [pendingBreak, setPendingBreak] = useState(false);
 
   const intervalRef = useRef(null);
 
-  const getCurrentDuration = () =>
-    isBreak ? (isLongSession ? longBreak : shortBreak) : isLongSession ? longSession : shortSession;
-
-  const tick = () => {
+  // Helper to get timer state from localStorage
+  const getTimerFromStorage = () => {
     const stored = loadTimer();
-    if (!stored || !stored.endTime) return;
+    if (!stored) return {
+      isBreak: false,
+      isLongSession: true,
+      pendingBreak: false,
+      endTime: null,
+      timeLeft: longSession,
+    };
 
-    const remaining = Math.ceil((stored.endTime - Date.now()) / 1000);
+    const { isBreak, isLongSession, pendingBreak, endTime } = stored;
 
-    if (remaining <= 0) {
-      setTimeLeft(0);
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      handleSessionComplete();
+    let computedTimeLeft = 0;
+
+    if (endTime) {
+      computedTimeLeft = Math.max(Math.ceil((endTime - Date.now()) / 1000), 0);
+    } else if (pendingBreak) {
+      computedTimeLeft = isLongSession ? longBreak : shortBreak;
     } else {
-      setTimeLeft(remaining);
+      computedTimeLeft = isBreak
+        ? isLongSession
+          ? longBreak
+          : shortBreak
+        : isLongSession
+        ? longSession
+        : shortSession;
     }
+
+    return { ...stored, timeLeft: computedTimeLeft };
   };
 
-  // fetch stats on mount
+  const startTimer = () => {
+    const timer = getTimerFromStorage();
+    if (intervalRef.current) return;
+
+    const endTime = Date.now() + timer.timeLeft * 1000;
+
+    saveTimer({
+      ...timer,
+      endTime,
+      pendingBreak: false,
+    });
+
+    intervalRef.current = setInterval(() => {
+      const updatedTimer = getTimerFromStorage();
+      setTimeLeft(updatedTimer.timeLeft);
+
+      if (updatedTimer.endTime && updatedTimer.timeLeft <= 0) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        handleSessionComplete();
+      }
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
+
+    const timer = getTimerFromStorage();
+    saveTimer({
+      ...timer,
+      endTime: null,
+      pendingBreak: false,
+    });
+
+    const duration = timer.isBreak
+      ? timer.isLongSession
+        ? longBreak
+        : shortBreak
+      : timer.isLongSession
+      ? longSession
+      : shortSession;
+
+    setTimeLeft(duration);
+  };
+
+  const handleSessionComplete = async () => {
+    const timer = getTimerFromStorage();
+
+    const nextIsBreak = !timer.isBreak;
+    const nextDuration = nextIsBreak
+      ? timer.isLongSession
+        ? longBreak
+        : shortBreak
+      : timer.isLongSession
+      ? longSession
+      : shortSession;
+
+    if (!timer.isBreak) {
+      try {
+        const data = await authFetch("http://localhost:5001/api/stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ overall: (timer.isLongSession ? longSession : shortSession) * 60 }),
+        });
+        setSuns(data.suns);
+        setEnergy(data.energy);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    saveTimer({
+      isBreak: nextIsBreak,
+      isLongSession: timer.isLongSession,
+      pendingBreak: nextIsBreak,
+      endTime: null,
+    });
+
+    setTimeLeft(nextDuration);
+  };
+
+  const handleTimerLength = () => {
+    const timer = getTimerFromStorage();
+    const newIsLongSession = !timer.isLongSession;
+
+    saveTimer({
+      ...timer,
+      isLongSession: newIsLongSession,
+      endTime: null,
+    });
+
+    setTimeLeft(
+      timer.isBreak
+        ? newIsLongSession
+          ? longBreak
+          : shortBreak
+        : newIsLongSession
+        ? longSession
+        : shortSession
+    );
+  };
+
+  // Fetch stats on mount
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -73,28 +190,22 @@ const TimerComponent = () => {
     fetchStats();
   }, []);
 
-  // load timer from localStorage
+  // Load timer from localStorage on mount
   useEffect(() => {
-    const stored = loadTimer();
-    if (!stored) return;
+    const timer = getTimerFromStorage();
+    setTimeLeft(timer.timeLeft);
 
-    setIsBreak(stored.isBreak);
-    setIsLongSession(stored.isLongSession);
-    setPendingBreak(stored.pendingBreak || false);
+    if (timer.endTime) {
+      intervalRef.current = setInterval(() => {
+        const updatedTimer = getTimerFromStorage();
+        setTimeLeft(updatedTimer.timeLeft);
 
-    if (stored.endTime) {
-      const remaining = Math.ceil((stored.endTime - Date.now()) / 1000);
-      if (remaining > 0) {
-        setTimeLeft(remaining);
-        intervalRef.current = setInterval(tick, 1000);
-      } else if (stored.pendingBreak) {
-        // break pending but not started
-        setTimeLeft(stored.isLongSession ? longBreak : shortBreak);
-      }
-    } else if (stored.pendingBreak) {
-      setTimeLeft(stored.isLongSession ? longBreak : shortBreak);
-    } else {
-      setTimeLeft(getCurrentDuration());
+        if (updatedTimer.endTime && updatedTimer.timeLeft <= 0) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+          handleSessionComplete();
+        }
+      }, 1000);
     }
 
     return () => {
@@ -102,75 +213,15 @@ const TimerComponent = () => {
     };
   }, []);
 
-  // handle toggling long/short session when timer not running
-  useEffect(() => {
-    if (intervalRef.current || isBreak) return;
-
-    const nextDuration = isLongSession ? longSession : shortSession;
-    setTimeLeft(nextDuration);
-
-    const stored = loadTimer();
-    if (stored) saveTimer({ ...stored, isLongSession });
-  }, [isLongSession]);
-
-  const startTimer = () => {
-    if (intervalRef.current) return;
-
-    const endTime = Date.now() + timeLeft * 1000;
-    saveTimer({
-      endTime,
-      isBreak,
-      isLongSession,
-      pendingBreak: false, 
-    });
-    setPendingBreak(false);
-
-    intervalRef.current = setInterval(tick, 1000);
-  };
-
-  const stopTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = null;
-
-    clearTimer();
-    setTimeLeft(getCurrentDuration());
-    setPendingBreak(false);
-  };
-
-  const handleSessionComplete = async () => {
-    clearTimer();
-    intervalRef.current = null;
-
-    const nextIsBreak = !isBreak;
-    const nextDuration = nextIsBreak ? (isLongSession ? longBreak : shortBreak) : getCurrentDuration();
-
-    if (!isBreak) {
-      try {
-        const data = await authFetch("http://localhost:5001/api/stats", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ overall: getCurrentDuration() * 60 }),
-        });
-        setSuns(data.suns);
-        setEnergy(data.energy);
-        alert("Work session finished");
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      alert("Break finished. Back to work.");
-    }
-
-    // mark break as pending if break not started yet
-    saveTimer({
-      endTime: nextIsBreak ? null : Date.now() + nextDuration * 1000,
-      isBreak: nextIsBreak,
-      isLongSession,
-      pendingBreak: nextIsBreak,
-    });
-    setIsBreak(nextIsBreak);
-    setTimeLeft(nextDuration);
-    setPendingBreak(nextIsBreak);
+  const getCurrentDuration = () => {
+    const timer = getTimerFromStorage();
+    return timer.isBreak
+      ? timer.isLongSession
+        ? longBreak
+        : shortBreak
+      : timer.isLongSession
+      ? longSession
+      : shortSession;
   };
 
   const getSteps = () => Math.min(getCurrentDuration(), 5);
@@ -181,6 +232,8 @@ const TimerComponent = () => {
     return `${mm}:${ss}`;
   };
 
+  const timer = getTimerFromStorage(); // derived for UI
+
   return (
     <div className="flex flex-col items-center gap-8 text-base-content font-mono p-6 pt-20 min-h-0">
       <div className="flex flex-col md:flex-row gap-7 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
@@ -190,11 +243,17 @@ const TimerComponent = () => {
               const currentDuration = getCurrentDuration();
               const stepsCount = getSteps();
               const stepLength = currentDuration / stepsCount;
-              const stepIndex = Math.max(0, stepsCount - Math.ceil(timeLeft / stepLength));
+              const stepIndex = Math.max(
+                0,
+                stepsCount - Math.ceil(timeLeft / stepLength)
+              );
               const isActive = index <= stepIndex;
 
               return (
-                <li key={index} className={`step ${isActive ? "step-primary" : ""}`}>
+                <li
+                  key={index}
+                  className={`step ${isActive ? "step-primary" : ""}`}
+                >
                   {Math.round(stepLength * (index + 1))} min
                 </li>
               );
@@ -202,13 +261,15 @@ const TimerComponent = () => {
           </ul>
 
           <div className="flex justify-between items-center mt-4">
-            <p className="text-success font-semibold">{isBreak ? "Break" : "Work"} Timer</p>
+            <p className="text-success font-semibold">
+              {timer.isBreak ? "Break" : "Work"} Timer
+            </p>
             <input
               type="checkbox"
               className="toggle toggle-primary"
-              checked={isLongSession}
-              disabled={intervalRef.current !== null || isBreak}
-              onChange={(e) => setIsLongSession(e.target.checked)}
+              checked={timer.isLongSession}
+              disabled={intervalRef.current !== null || timer.isBreak}
+              onChange={handleTimerLength}
             />
           </div>
 
@@ -218,9 +279,15 @@ const TimerComponent = () => {
         </div>
 
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col items-center gap-4">
-          <h1 className="text-6xl text-primary font-bold">{displayTime(timeLeft)}</h1>
+          <h1 className="text-6xl text-primary font-bold">
+            {displayTime(timeLeft)}
+          </h1>
           <div className="flex gap-4 mt-6">
-            <button className="btn btn-success" onClick={startTimer} disabled={intervalRef.current !== null}>
+            <button
+              className="btn btn-success"
+              onClick={startTimer}
+              disabled={intervalRef.current !== null}
+            >
               Start
             </button>
             <button className="btn btn-error" onClick={stopTimer}>
