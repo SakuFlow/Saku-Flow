@@ -45,7 +45,7 @@ const Navbar = ({ theme, setTheme, user, setUser }) => {
           <a href="/">Timer</a>
         </li>
         <li>
-          <a href="#energy">Energie</a>
+          <a href="/energy">Energie</a>
         </li>
         <li>
           <a href="/shop">Shop</a>

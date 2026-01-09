@@ -5,6 +5,7 @@ import ShopPage from "./pages/ShopPage.jsx";
 import StatsPage from "./pages/StatsPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import EnergyPage from "./pages/EnergyPage.jsx";
 
 const THEME_KEY = "app_theme";
 
@@ -33,6 +34,11 @@ const App = () => {
       <Route
         path="/stats"
         element={<StatsPage theme={theme} setTheme={setTheme} />}
+      />
+
+      <Route 
+        path="/energy"
+        element={< EnergyPage theme={theme} setTheme={setTheme} />}
       />
     </Routes>
   );

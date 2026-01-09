@@ -20,32 +20,8 @@ async function authFetch(url, options = {}) {
   return res.json();
 }
 
-const Stat = () => {
+const Stat = ({ suns, energy, overall }) => {
 
-  const [suns, setSuns] = useState(0);
-  const [energy, setEnergy] = useState(0);
-  const [overall, setOverall] = useState(0);
-
-  useEffect(() => {
-      const fetchStats = async () => {
-        try {
-          const data = await authFetch("http://localhost:5001/api/stats", {
-            credentials: "include"
-          });
-  
-          setSuns(data.suns || 0);
-          setEnergy(data.energy || 0);
-
-          const hours = Math.round((data.overall / 3600) * 100) / 100;
-
-          setOverall(hours);
-        } catch (error) {
-          console.error("Failed to fetch stats:", error);
-        }
-      };
-  
-      fetchStats();
-    }, []);
 
   return (
     <div className="stats shadow-lg rounded-xl bg-base-100 p-4 w-full md:w-3/4 mx-auto gap-4">
