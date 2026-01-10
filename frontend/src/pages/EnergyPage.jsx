@@ -84,7 +84,7 @@ const EnergyPage = ({ theme, setTheme }) => {
     <div>
       <Navbar theme={theme} setTheme={setTheme} user={user} setUser={setUser} />
       <Stat suns={suns} energy={energy} overall={overall} /> 
-      <ConversionComponent maxEnergy={energy} suns={suns} />
+      <ConversionComponent maxEnergy={energy} suns={suns} setEnergy={setEnergy} setSuns={setSuns} />
     </div>
   )
 }

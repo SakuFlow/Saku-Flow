@@ -23,6 +23,50 @@ export async function getStats(req, res) {
     }
 }
 
+export async function handleConvertedEnergy(req, res) {
+    try {
+        const userId = req.user._id;
+        const MIN = 50;
+
+        const userStats = await Stat.findOne({ user_id: userId} );
+        if(!userStats){
+            return res.status(404).json({ message: "User stats not foudn"} );
+        }
+
+        let { convertedEnergy } = req.body;
+
+        if(typeof convertedEnergy !== "number" || isNaN(convertedEnergy)){
+            return res.status(400).json({ message: "Invalid energy value"})
+        }
+        convertedEnergy = Math.round(convertedEnergy);
+
+        if (convertedEnergy < MIN) {
+            return res.status(400).json({ message: `Energy must be at least ${MIN}` });
+                }
+        if (convertedEnergy > userStats.energy) {
+            return res.status(400).json({ message: "Not enough energy" });
+        }
+
+        const updatedStats = await Stat.findOneAndUpdate(
+            { user_id: userId, energy: { $gte: convertedEnergy } }, 
+            {
+                $inc: { convertedEnergy: convertedEnergy, energy: -convertedEnergy },
+            },
+            { new: true }
+        );
+
+
+        return res.status(200).json({
+            message: "Energy converted successfully",
+            energy: updatedStats.energy,
+            convertedEnergy: updatedStats.convertedEnergy,
+        });
+    } catch (error) {
+        console.error("Error in handleConvertedEnergy method:", error);
+        res.status(500).json({ message: "internal server error" });
+    }
+}
+
 
 export async function updateStat(req, res) {
     try {
@@ -31,7 +75,10 @@ export async function updateStat(req, res) {
 
         const userUpgrades = await Upgrades.findOne({ user_id: userId });
 
+        const userStats = await Stat.findOne({ user_id: userId });
+
         let gainedSuns = BASE_VALUES.suns;
+
         let gainedEnergy = BASE_VALUES.energy;
 
         if (userUpgrades?.upgrades?.size > 0) {
@@ -50,6 +97,7 @@ export async function updateStat(req, res) {
                 $inc: {
                     suns: gainedSuns,
                     energy: gainedEnergy,
+                    convertedEnergy: -userStats.convertedEnergy,
                     overall: overall
                 }
             },

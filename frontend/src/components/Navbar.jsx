@@ -34,7 +34,7 @@ const Navbar = ({ theme, setTheme, user, setUser }) => {
       </div>
 
       {/* Right side: Theme */}
-      <div className="absolute right-4 top-4">
+      <div className="absolute right-4 top-4 z-50" >
         <ThemeController theme={theme} setTheme={setTheme} />
       </div>
 

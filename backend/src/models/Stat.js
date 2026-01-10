@@ -13,6 +13,12 @@ const statSchema = new mongoose.Schema({
         min: 0
     },
 
+    convertedEnergy: {
+      type: Number,
+      default: 0,
+      min: 0  
+    },
+
     overall: {
         type: Number,
         default: 0,

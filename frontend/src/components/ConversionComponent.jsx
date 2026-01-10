@@ -1,40 +1,63 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 
-const ConversionComponent = ({ maxEnergy }) => {
-  const MIN = 50
-  const MAX_STEPS = 7
-  const CONVERSION_RATE = 1.3
+async function authFetch(url, options = {}) {
+  options.credentials = "include";
 
-  const { step, values } = useMemo(() => {
-    if (maxEnergy <= MIN) {
-      return {
-        step: 1,
-        values: [MIN],
-      }
+  let res = await fetch(url, options);
+
+  if (res.status === 401) {
+    // Attempt token refresh
+    const refreshRes = await fetch(
+      "http://localhost:5001/api/users/auth/refresh",
+      { method: "POST", credentials: "include" }
+    );
+
+    if (refreshRes.ok) {
+      res = await fetch(url, options); // retry original request
+    } else {
+      throw new Error("Session expired. Please log in again");
     }
+  }
 
-    const range = maxEnergy - MIN
-    const steps = Math.min(MAX_STEPS, range + 1)
-    const step = Math.max(1, Math.floor(range / (steps - 1)))
+  return res.json();
+}
 
-    const values = Array.from({ length: steps }, (_, i) =>
-      MIN + i * step
-    )
+const ConversionComponent = ({ maxEnergy, setMaxEnergy, suns, setSuns, setOverall }) => {
+  const MIN = 50;
+  const CONVERSION_RATE = 1.4;
 
-    values[values.length - 1] = maxEnergy
+  const [energyToConvert, setEnergyToConvert] = useState(Math.min(MIN, maxEnergy));
 
-    return { step, values }
-  }, [maxEnergy])
+  const disabled = maxEnergy < MIN;
 
-  const [energyToConvert, setEnergyToConvert] = useState(MIN)
-
+  // Adjust energyToConvert if maxEnergy decreases below current value
   useEffect(() => {
-    setEnergyToConvert(values[0])
-  }, [values])
+    setEnergyToConvert(prev => Math.min(prev, maxEnergy));
+  }, [maxEnergy]);
 
-  const sunsGained = Math.round(energyToConvert * CONVERSION_RATE)
+  const sunsGained = Math.round(energyToConvert * CONVERSION_RATE);
 
-  const disabled = maxEnergy <= MIN
+  const handleChange = (e) => {
+    const value = Math.round(Number(e.target.value));
+    setEnergyToConvert(Math.max(MIN, Math.min(value, maxEnergy)));
+  };
+
+  const fetchConvertEnergy = async () => {
+    try {
+      const data = await authFetch("http://localhost:5001/api/stats/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ convertedEnergy: energyToConvert }),
+      });
+
+      if (data.energy !== undefined) setMaxEnergy(data.energy);
+
+      setEnergyToConvert(Math.max(MIN, Math.min(data.energy, maxEnergy)));
+    } catch (error) {
+      console.error("Failed to fetch energy:", error);
+      alert(error.message || "Energy conversion failed");
+    }
+  };
 
   return (
     <div className="flex justify-center items-center w-full mt-10">
@@ -49,32 +72,16 @@ const ConversionComponent = ({ maxEnergy }) => {
         </p>
 
         {/* Slider */}
-        <div className="space-y-4">
-          <input
-            type="range"
-            min={MIN}
-            max={maxEnergy}
-            step={step}
-            value={energyToConvert}
-            disabled={disabled}
-            onChange={(e) => setEnergyToConvert(Number(e.target.value))}
-            className="range range-primary"
-          />
-
-          {/* Tick marks */}
-          <div className="flex justify-between px-2 text-xs opacity-60">
-            {values.map((_, i) => (
-              <span key={i}>|</span>
-            ))}
-          </div>
-
-          {/* Labels */}
-          <div className="flex justify-between px-2 text-xs">
-            {values.map((v) => (
-              <span key={v}>{v}</span>
-            ))}
-          </div>
-        </div>
+        <input
+          type="range"
+          min={MIN}
+          max={maxEnergy}
+          step={1}
+          value={energyToConvert}
+          disabled={disabled}
+          onChange={handleChange}
+          className="range range-primary"
+        />
 
         {/* Output */}
         <div className="bg-base-100 rounded-xl p-4 shadow-inner space-y-2">
@@ -95,6 +102,7 @@ const ConversionComponent = ({ maxEnergy }) => {
         <button
           className="btn btn-primary w-full"
           disabled={disabled}
+          onClick={fetchConvertEnergy}
         >
           Convert Energy
         </button>
@@ -106,7 +114,7 @@ const ConversionComponent = ({ maxEnergy }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ConversionComponent
+export default ConversionComponent;

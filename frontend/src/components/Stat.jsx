@@ -1,24 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-async function authFetch(url, options = {}) {
-  options.credentials = "include";
-  let res = await fetch(url, options);
-
-  if(res.status === 401) {
-    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
-      method: "POST",
-      credentials: "include"
-    });
-
-    if(refreshRes.ok) {
-      res = await fetch(url, options);
-    } else{
-      throw new Error("Session expired. Please log in again");
-    }
-  }
-
-  return res.json();
-}
 
 const Stat = ({ suns, energy, overall }) => {
 
