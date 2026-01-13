@@ -30,10 +30,10 @@ const loadTimer = () =>
 const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 
 const TimerComponent = () => {
-  const shortSession = 5;
-  const longSession = 5;
-  const shortBreak = 2;
-  const longBreak = 4;
+  const shortSession = 25 * 60;
+  const longSession = 50 * 60;
+  const shortBreak = 5 * 60;
+  const longBreak = 10 * 60;
 
   const [suns, setSuns] = useState(0);
   const [energy, setEnergy] = useState(0);
@@ -235,8 +235,8 @@ const TimerComponent = () => {
   const timer = getTimerFromStorage(); // derived for UI
 
   return (
-    <div className="flex flex-col items-center gap-8 text-base-content font-mono p-6 pt-20 min-h-0">
-      <div className="flex flex-col md:flex-row gap-7 w-full max-w-4xl p-6 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
+    <div className="flex flex-col items-center gap-8 text-base-content font-mono p-2 pt-20 min-h-0">
+      <div className="flex flex-col md:flex-row gap-4 w-full max-w-4xl p-4 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
           <ul className="steps steps-horizontal gap-2">
             {[...Array(getSteps())].map((_, index) => {
