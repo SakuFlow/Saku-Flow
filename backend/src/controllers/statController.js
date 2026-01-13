@@ -71,8 +71,10 @@ export async function handleConvertedEnergy(req, res) {
 export async function updateStat(req, res) {
     try {
         const userId = req.user._id;
-        const { overall } = req.body;
+        const { time } = req.body;
 
+
+        const converterMultipier = 1.4; 
         const userUpgrades = await Upgrades.findOne({ user_id: userId });
 
         const userStats = await Stat.findOne({ user_id: userId });
@@ -90,6 +92,7 @@ export async function updateStat(req, res) {
                 if (bonus.energy) gainedEnergy += bonus.energy * level;
             }
         }
+        if (userStats.convertedEnergy !== 0) gainedSuns += Math.round(userStats.convertedEnergy * converterMultipier);
 
         const updatedStat = await Stat.findOneAndUpdate(
             { user_id: userId },
@@ -98,10 +101,10 @@ export async function updateStat(req, res) {
                     suns: gainedSuns,
                     energy: gainedEnergy,
                     convertedEnergy: -userStats.convertedEnergy,
-                    overall: overall
+                    overall: time
                 }
             },
-            { new: true, upsert: true }
+            { new: true }
         );
         await checkAchievements(userId);
         res.status(200).json(updatedStat);

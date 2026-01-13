@@ -6,14 +6,13 @@ async function authFetch(url, options = {}) {
   let res = await fetch(url, options);
 
   if (res.status === 401) {
-    // Attempt token refresh
     const refreshRes = await fetch(
       "http://localhost:5001/api/users/auth/refresh",
       { method: "POST", credentials: "include" }
     );
 
     if (refreshRes.ok) {
-      res = await fetch(url, options); // retry original request
+      res = await fetch(url, options); 
     } else {
       throw new Error("Session expired. Please log in again");
     }
@@ -22,7 +21,7 @@ async function authFetch(url, options = {}) {
   return res.json();
 }
 
-const ConversionComponent = ({ maxEnergy, setMaxEnergy, suns, setSuns, setOverall }) => {
+const ConversionComponent = ({ maxEnergy, setMaxEnergy }) => {
   const MIN = 50;
   const CONVERSION_RATE = 1.4;
 
@@ -30,7 +29,6 @@ const ConversionComponent = ({ maxEnergy, setMaxEnergy, suns, setSuns, setOveral
 
   const disabled = maxEnergy < MIN;
 
-  // Adjust energyToConvert if maxEnergy decreases below current value
   useEffect(() => {
     setEnergyToConvert(prev => Math.min(prev, maxEnergy));
   }, [maxEnergy]);

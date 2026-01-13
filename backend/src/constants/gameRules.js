@@ -80,15 +80,15 @@ export const ACHIEVEMENTS = {
   },
 
   watts_up: {
-    energy: 500
+    energy: 100
   },
 
   overcharged: {
-    energy: 1000
+    energy: 200
   },
 
   full_circuit: {
-    energy: 10000
+    energy: 400
   },
 
   // overall study timer achievements

@@ -136,7 +136,7 @@ const TimerComponent = () => {
         const data = await authFetch("http://localhost:5001/api/stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ overall: (timer.isLongSession ? longSession : shortSession) }),
+          body: JSON.stringify({ time: (timer.isLongSession ? longSession : shortSession) }),
         });
         setSuns(data.suns);
         setEnergy(data.energy);
