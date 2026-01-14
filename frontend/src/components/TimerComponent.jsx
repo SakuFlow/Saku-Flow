@@ -30,10 +30,10 @@ const loadTimer = () =>
 const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 
 const TimerComponent = () => {
-  const shortSession = 5;
-  const longSession = 5;
-  const shortBreak = 4;
-  const longBreak = 3;
+  const shortSession = 25 * 60;
+  const longSession = 50 * 60;
+  const shortBreak = 5 * 60;
+  const longBreak = 10 * 60;
 
   const [suns, setSuns] = useState(0);
   const [energy, setEnergy] = useState(0);
