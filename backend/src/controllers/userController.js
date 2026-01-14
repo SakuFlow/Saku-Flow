@@ -76,7 +76,9 @@ export async function registerUser(req, res) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({ username, email, password: hashedPassword });
+        const lowEmail = email.toLowerCase();
+
+        const newUser = new User({ username, email: lowEmail, password: hashedPassword });
 
         const accessToken = createAccessToken(newUser._id);
         const refreshToken = createRefreshToken(newUser._id);

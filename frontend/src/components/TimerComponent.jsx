@@ -30,10 +30,10 @@ const loadTimer = () =>
 const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 
 const TimerComponent = () => {
-  const shortSession = 25 * 60;
-  const longSession = 50 * 60;
-  const shortBreak = 5 * 60;
-  const longBreak = 10 * 60;
+  const shortSession = 5;
+  const longSession = 5;
+  const shortBreak = 4;
+  const longBreak = 3;
 
   const [suns, setSuns] = useState(0);
   const [energy, setEnergy] = useState(0);
@@ -97,6 +97,11 @@ const TimerComponent = () => {
     }, 1000);
   };
 
+  const playSound = () => {
+    const audio = new Audio("/alarm.mp3");
+    audio.play().catch((err) => console.log("Audio play failed:", err));
+  }
+
   const stopTimer = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
@@ -107,6 +112,7 @@ const TimerComponent = () => {
       endTime: null,
       pendingBreak: false,
     });
+
 
     const duration = timer.isBreak
       ? timer.isLongSession
@@ -144,6 +150,14 @@ const TimerComponent = () => {
         console.error(error);
       }
     }
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Pomodoro Timer", {
+        body: timer.isBreak ? "Break is over! Time to work." : "Work session finished! Take a break."
+      });
+    }
+
+    playSound();
 
     saveTimer({
       isBreak: nextIsBreak,
