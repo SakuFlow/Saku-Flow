@@ -1,36 +1,25 @@
 import React, { useEffect, useState } from "react";
 
 async function authFetch(url, options = {}) {
-  const finalOptions = {
-    ...options,
-    credentials: "include",
-  };
+  options.credentials = "include";
+  let res = await fetch(url, options);
 
-  let res = await fetch(url, finalOptions);
+  if(res.status === 401) {
+    const refreshRes = await fetch("/api/users/auth/refresh", {
+      method: "POST",
+      credentials: "include"
+    });
 
-  if (res.status === 401) {
-    const refreshRes = await fetch(
-      "/api/users/auth/refresh",
-      {
-        method: "POST",
-        credentials: "include",
-      }
-    );
-
-    if (!refreshRes.ok) {
-      throw new Error("Session expired. Please log in again.");
+    if(refreshRes.ok) {
+      res = await fetch(url, options);
+    } else{
+      throw new Error("Session expired. Please log in again");
     }
-
-    res = await fetch(url, finalOptions);
   }
 
-  if (!res.ok) {
-    throw new Error(`Request failed with status ${res.status}`);
-  }
-
-  const text = await res.text();
-  return text ? JSON.parse(text) : {};
+  return res.json();
 }
+
 
 const Achievements = () => {
   const [unlockedMap, setUnlockedMap] = useState({});
@@ -42,7 +31,7 @@ const Achievements = () => {
     const fetchAchievements = async () => {
       try {
         const data = await authFetch(
-          "http://localhost:5001/api/achievements"
+          "/api/achievements"
         );
 
         if (!isMounted) return;

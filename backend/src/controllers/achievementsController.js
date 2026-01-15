@@ -5,6 +5,7 @@ import { ACHIEVEMENTS } from "../constants/gameRules.js";
 export async function getAchievements(req, res) {
     try {
         const user_id = req.user._id;
+        await checkAchievements(user_id);
 
         const achievements = await Achievements.findOne({ user_id }).lean();
         res.status(200).json(achievements ?? { achievements: {} });
@@ -17,10 +18,6 @@ export async function getAchievements(req, res) {
 
 
 
-/*
-Right now the following function is only for the suns..
-In the future i need to add energy and overall too :)
-*/
 export async function checkAchievements(userId) {
     const stats = await Stat.findOne({ user_id: userId });
     if (!stats) return;
