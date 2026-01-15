@@ -6,7 +6,7 @@ async function authFetch(url, options = {}) {
 
   if (res.status === 401) {
     const refreshRes = await fetch(
-      "http://localhost:5001/api/users/auth/refresh",
+      "/api/users/auth/refresh",
       { method: "POST", credentials: "include" }
     );
     if (refreshRes.ok) {
@@ -139,7 +139,7 @@ const TimerComponent = () => {
 
     if (!timer.isBreak) {
       try {
-        const data = await authFetch("http://localhost:5001/api/stats", {
+        const data = await authFetch("/api/stats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ time: (timer.isLongSession ? longSession : shortSession) }),
@@ -194,7 +194,7 @@ const TimerComponent = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await authFetch("http://localhost:5001/api/stats");
+        const data = await authFetch("/api/stats");
         setSuns(data.suns);
         setEnergy(data.energy);
       } catch (error) {

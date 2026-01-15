@@ -6,7 +6,7 @@ async function authFetch(url, options = {}) {
   let res = await fetch(url, options);
 
   if(res.status === 401) {
-    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+    const refreshRes = await fetch("/api/users/auth/refresh", {
       method: "POST",
       credentials: "include"
     });
@@ -39,7 +39,7 @@ useEffect(() => {
 
   const fetchTodos = async () => {
     try {
-      const data = await authFetch("http://localhost:5001/api/todos", {
+      const data = await authFetch("/api/todos", {
         credentials: "include"
       });
       
@@ -55,7 +55,7 @@ useEffect(() => {
     if(!newTodo.trim()) return;
 
     try {
-      const data = await authFetch("http://localhost:5001/api/todos", {
+      const data = await authFetch("/api/todos", {
         method: "POST",
         headers: { "Content-Type" : "application/json" },
         credentials: "include",
@@ -71,7 +71,7 @@ useEffect(() => {
 
   const toggleTodo = async (id) => {
     try {
-      const data = await authFetch(`http://localhost:5001/api/todos/${id}`,{
+      const data = await authFetch(`/api/todos/${id}`,{
         method: "PATCH",
         credentials: "include"
       });
@@ -86,7 +86,7 @@ useEffect(() => {
 
   const deleteTodo = async (id) => {
     try {
-      const data = await authFetch(`http://localhost:5001/api/todos/${id}`, {
+      const data = await authFetch(`/api/todos/${id}`, {
         method: "DELETE",
         credentials: "include"
       });

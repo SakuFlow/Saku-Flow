@@ -10,7 +10,7 @@ async function authFetch(url, options = {}) {
 
   if (res.status === 401) {
     const refreshRes = await fetch(
-      "http://localhost:5001/api/users/auth/refresh",
+      "/api/users/auth/refresh",
       {
         method: "POST",
         credentials: "include",

@@ -10,7 +10,7 @@ async function authFetch(url, options = {}) {
   let res = await fetch(url, options);
 
   if(res.status === 401) {
-    const refreshRes = await fetch("http://localhost:5001/api/users/auth/refresh", {
+    const refreshRes = await fetch("/api/users/auth/refresh", {
       method: "POST",
       credentials: "include"
     });
@@ -36,7 +36,7 @@ const StatsPage = ({ theme,  setTheme }) => {
   
       const fetchCurrentUser = async () => {
         try {
-          const res = await fetch("http://localhost:5001/api/users/me", {
+          const res = await fetch("/api/users/me", {
             credentials: "include"
           });
   
@@ -61,7 +61,7 @@ const StatsPage = ({ theme,  setTheme }) => {
     useEffect(() => {
         const fetchStats = async () => {
           try {
-            const data = await authFetch("http://localhost:5001/api/stats", {
+            const data = await authFetch("/api/stats", {
               credentials: "include"
             });
       

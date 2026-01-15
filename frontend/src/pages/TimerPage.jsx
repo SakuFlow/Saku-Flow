@@ -11,7 +11,7 @@ const TimerPage = ({ theme,  setTheme }) => {
 
     const fetchCurrentUser = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/users/me", {
+        const res = await fetch("/api/users/me", {
           credentials: "include"
         });
 

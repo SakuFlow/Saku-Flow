@@ -61,7 +61,7 @@ const Card = () => {
     setLoadingItem(item.upgradeName);
 
     try {
-      const data = await authFetch("http://localhost:5001/api/upgrades/buy", {
+      const data = await authFetch("/api/upgrades/buy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

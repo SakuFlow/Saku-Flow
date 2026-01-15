@@ -7,7 +7,7 @@ async function authFetch(url, options = {}) {
 
   if (res.status === 401) {
     const refreshRes = await fetch(
-      "http://localhost:5001/api/users/auth/refresh",
+      "/api/users/auth/refresh",
       { method: "POST", credentials: "include" }
     );
 
@@ -42,7 +42,7 @@ const ConversionComponent = ({ maxEnergy, setMaxEnergy }) => {
 
   const fetchConvertEnergy = async () => {
     try {
-      const data = await authFetch("http://localhost:5001/api/stats/convert", {
+      const data = await authFetch("/api/stats/convert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ convertedEnergy: energyToConvert }),

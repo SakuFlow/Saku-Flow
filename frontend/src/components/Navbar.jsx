@@ -7,7 +7,7 @@ const Navbar = ({ theme, setTheme, user, setUser }) => {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/users/logout", {
+      const res = await fetch("/api/users/logout", {
         method: "POST",
         credentials: "include"
       });
