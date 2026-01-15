@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 const SHOP_ITEMS = [
-  { id: 1, displayName: "Golden Sun", upgradeName: "golden_sun", description: "coming soon...", basePrice: 10, priceMultiplier: 1.2 },
-  { id: 2, displayName: "Energy Drink", upgradeName: "energy_drink", description: "Coming soon...", basePrice: 50, priceMultiplier: 1.3 },
-  { id: 3, displayName: "Study Book", upgradeName: "study_book", description: "Comming soon..", basePrice: 100, priceMultiplier: 1.4 },
-  { id: 4, displayName: "Magic Plant", upgradeName: "magic_plant", description: "Coming soon..", basePrice: 200, priceMultiplier: 1.5 },
-  { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "Coming soon...", basePrice: 1000, priceMultiplier: 1.6 },
+  { id: 1, displayName: "Golden Sun", upgradeName: "golden_sun", description: "20% more suns", basePrice: 10, priceMultiplier: 1.2 },
+  { id: 2, displayName: "Energy Drink", upgradeName: "energy_drink", description: "30% more suns", basePrice: 50, priceMultiplier: 1.3 },
+  { id: 3, displayName: "Study Book", upgradeName: "study_book", description: "40% more suns", basePrice: 100, priceMultiplier: 1.4 },
+  { id: 4, displayName: "Magic Plant", upgradeName: "magic_plant", description: "50% more suns", basePrice: 200, priceMultiplier: 1.5 },
+  { id: 5, displayName: "Solar Panel", upgradeName: "solar_panel", description: "60% more suns", basePrice: 1000, priceMultiplier: 1.6 },
 ];
 
 
