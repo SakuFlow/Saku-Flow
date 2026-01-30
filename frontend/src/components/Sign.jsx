@@ -93,7 +93,7 @@ function SignUpForm() {
           </div>
 
           <button type="submit" className="btn btn-primary mt-4">
-            Sign In
+            Sign Up
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-2">

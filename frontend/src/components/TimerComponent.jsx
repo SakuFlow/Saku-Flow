@@ -32,7 +32,7 @@ const clearTimer = () => localStorage.removeItem(TIMER_KEY);
 const TimerComponent = () => {
   const shortSession = 25 * 60;
   const longSession = 50 * 60;
-  const shortBreak = 5 * 60;
+  const shortBreak = 2;
   const longBreak = 10 * 60;
 
   const [suns, setSuns] = useState(0);
@@ -169,6 +169,27 @@ const TimerComponent = () => {
     setTimeLeft(nextDuration);
   };
 
+  const skipBreak = () => {
+    if(intervalRef.current){
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    const timer = getTimerFromStorage();
+
+    const nextDuration = timer.isLongSession
+    ? longSession
+    : shortSession;
+
+    saveTimer({
+      isBreak: false,
+      isLongSession: timer.isLongSession,
+      pendingBreak: false,
+      endTime: null
+    });
+    setTimeLeft(nextDuration);
+  }
+
   const handleTimerLength = () => {
     const timer = getTimerFromStorage();
     const newIsLongSession = !timer.isLongSession;
@@ -229,13 +250,16 @@ const TimerComponent = () => {
 
   const getCurrentDuration = () => {
     const timer = getTimerFromStorage();
-    return timer.isBreak
+    const duration = timer.isBreak
       ? timer.isLongSession
         ? longBreak
         : shortBreak
       : timer.isLongSession
       ? longSession
       : shortSession;
+
+      const original = Math.min(100, Math.max(0, (timeLeft / duration) * 100));
+      return 100 - original;
   };
 
   const getSteps = () => Math.min(getCurrentDuration(), 4);
@@ -252,6 +276,13 @@ const TimerComponent = () => {
     <div className="flex flex-col items-center gap-8 text-base-content font-mono p-2 pt-20 min-h-0">
       <div className="flex flex-col md:flex-row gap-4 w-full max-w-4xl p-4 bg-base-300 border border-base-content/20 shadow-xl rounded-2xl">
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col gap-4">
+          <p className="text-success font-semibold">Progress bar:</p>    
+         <progress
+          className="progress progress-primary gap-2"
+          value={getCurrentDuration()}
+          max={100}
+        />    
+        {/*
           <ul className="steps steps-horizontal gap-2">
             {[...Array(getSteps())].map((_, index) => {
               const currentDuration = getCurrentDuration();
@@ -273,11 +304,9 @@ const TimerComponent = () => {
               );
             })}
           </ul>
-
+        */}
           <div className="flex justify-between items-center mt-4">
-            <p className="text-success font-semibold">
-              {timer.isBreak ? "Break" : "Work"} Timer
-            </p>
+            <p>Switch Timer Length:</p>
             <input
               type="checkbox"
               className="toggle toggle-primary"
@@ -293,6 +322,10 @@ const TimerComponent = () => {
         </div>
 
         <div className="flex-1 p-5 bg-base-200 border border-base-content/20 rounded-xl flex flex-col items-center gap-4">
+        <p>Timer State:</p>
+            <p className="text-success font-semibold">
+              {timer.isBreak ? "Break" : "Work"} Timer
+            </p>
           <h1 className="text-6xl text-primary font-bold">
             {displayTime(timeLeft)}
           </h1>
@@ -304,8 +337,11 @@ const TimerComponent = () => {
             >
               Start
             </button>
-            <button className="btn btn-error" onClick={stopTimer}>
-              Stop
+            <button
+              className={`btn ${timer.isBreak ? "btn-warning" : "btn-error"}`}
+              onClick={timer.isBreak ? skipBreak : stopTimer}
+            >
+              {timer.isBreak ? "Skip" : "Stop"}
             </button>
           </div>
         </div>
